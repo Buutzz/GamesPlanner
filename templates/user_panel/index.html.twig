@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ustawienia konta{% endblock %}
+
+{% block body %}
+<div class="container-xl mt-5">
+    <div class="row gy-5">
+        <div class="col-12">
+            <div class="session-header">
+                <h1>Profil użytkownika: {{ user.name }}</h1>
+                <a 
+                    href="{{ path('app_user_name_edit') }}"
+                    class="edit-link text-info"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="bottom" 
+                    data-bs-original-title="Edytuj profil"
+                >
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+            </div>
+            <p>Email: {{ user.email }}</p>
+            {% if user.games|length > 0 %}
+            <div>
+                <p>
+                    <strong>
+                        Gry:
+                    </strong>
+                </p>
+                {% for game in user.games %}
+                    <span class="btn btn-outline-secondary">
+                        {{ game.name }}
+                    </span>
+                {% endfor %}
+            </div>
+            {% else %}
+                <p>Nie jesteś zapisany do żadnej gry.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

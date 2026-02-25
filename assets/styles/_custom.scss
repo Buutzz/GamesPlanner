@@ -1,0 +1,101 @@
+body{
+    background: radial-gradient(
+    circle at center,
+    #1e2a38 0%,
+    #2a2f45 60%,
+    #1b2230 100%
+  );
+}
+
+.navbar .nav-link,
+.navbar-brand,
+.navbar{
+    border: none !important;
+}
+
+.fc-day-marked-available {
+  background-color: #c8f7c5 !important;
+  cursor: pointer;
+}
+
+.fc-day-marked-unavailable {
+  background-color: #f7c5c5 !important;
+  cursor: pointer;
+}
+
+.fc-day-session {
+  background-color: #4caf50 !important;
+}
+
+.fc .fc-day-other {
+  background-color: #f5f5f5 !important;
+  opacity: 0.5;
+}
+
+.fc .fc-day-other .fc-daygrid-day-number {
+  color: #999 !important;
+}
+
+.fc:not(.home-calendar) .fc-daygrid-day-number{
+    color: var(--bs-primary-text-emphasis) !important
+}
+
+.fc a{
+    text-decoration: none !important;
+}
+
+.fc-theme-standard td, .fc-theme-standard th{
+    border-color:var(--bs-primary-text-emphasis) !important;
+}
+
+.fc .fc-scrollgrid, .fc .fc-scrollgrid table{
+    border: none !important;
+}
+
+.fc-toolbar-title{
+    text-transform: capitalize;
+}
+
+#calendar-wrapper,
+#card-wrapper{
+    box-shadow: rgba(255, 255, 255, 0.05) 0rem 1.25rem 1.6875rem 0rem;
+}
+
+#card-wrapper table tr td a{
+    text-decoration: none !important;
+}
+
+.session-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.session-header .edit-link {
+    font-size: 1.2em;
+    text-decoration: none;
+}
+
+.session-header .edit-link:hover {
+    opacity:0.8;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-flow: column;
+}
+main {
+    flex:1;
+}
+
+footer {
+    background: var(--bs-body-bg);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.login-logo{
+    width:150px;
+    height:auto;
+}

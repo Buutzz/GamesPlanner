@@ -1,0 +1,11 @@
+@import "variables";
+
+@import "./bootswatch/variables";
+@import "~bootstrap/scss/bootstrap";
+$bootstrap-icons-font-dir: "bootstrap-icons/font/fonts";
+
+// Import the Sass files as usual
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+@import "./bootswatch/bootswatch";
+
+@import 'custom';

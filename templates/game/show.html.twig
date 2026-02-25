@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sesja: {{ game.name }}{% endblock %}
+
+{% block body %}
+<div class="container-xl mt-5">
+    <div class="row gy-5">
+        <div class="col-12">
+            <div class="session-header">
+                <h1>{{ game.name }}</h1>
+                <a 
+                    href="{{ path('edit_game', {'id': game.id}) }}"
+                    class="edit-link text-info"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="bottom" 
+                    data-bs-original-title="Edytuj sesję {{ game.name }}"
+                >
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+            </div>
+            
+            <p><strong>Status sesji:</strong> 
+                <span class="
+            {% if game.active %}
+                text-success">Aktywna
+            {% else %}
+                text-danger">Nieaktywna
+            {% endif %}
+                </span>
+            </p>
+            <div><p><strong>Gracze:</strong></p>
+            {% for player in game.players %}
+                <span class="btn btn-outline-secondary" {% if player in playersWithoutAvailibility %}data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Gracz nie podał dostępności na ten miesiąc"{% endif %}>
+                    {{ player.name }}
+                    {% if player in playersWithoutAvailibility %}
+                    <i class="bi bi-calendar text-danger"></i>
+                    {% else %}
+                    <i class="bi bi-calendar-fill text-success"></i>
+                    {% endif %}
+                </span>
+            {% endfor %}
+            </div>
+        </div>
+        {% if game.active %}
+        <div class="col-12 py-5 mb-5 card text-white bg-primary" id="calendar-wrapper">
+            <div 
+                id="calendar"
+                class="js-calendar"
+                data-type="game"
+                data-common-dates='{{ commonDates|json_encode|raw }}'
+                data-session-dates='{{ sessionDates|json_encode|raw }}'
+                data-options='{
+                    "initialView": "dayGridMonth",
+                    "events": "/calendar/events"
+                }'
+            ></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    window.gameId = {{ game.id }};
+</script>
+{% endblock %}

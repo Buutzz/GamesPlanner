@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Twoja dostępność{% endblock %}
+
+{% block body %}
+<div>
+    <div class="container-xl mt-5">
+        <div class="row gy-5">
+            <div class="col-12">
+                <h1>Twoja dostępność</h1>
+            </div>
+            <div class="col-12 py-5 mb-5 card text-white bg-primary" id="calendar-wrapper">
+                <div 
+                    id="calendar" 
+                    class="js-calendar" 
+                    data-type="availability" 
+                    data-available-dates='{{ availableDates|json_encode|raw }}'
+                    data-options='{
+                        "initialView": "dayGridMonth",
+                        "events": "/calendar/events"
+                    }'
+                ></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

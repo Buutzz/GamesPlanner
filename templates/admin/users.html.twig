@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nadawanie uprawnień{% endblock %}
+
+{% block body %}
+
+<div class="container-xl mt-5">
+    <div class="row gy-5">
+        <div class="col-12">
+            <h1 class="mb-5">Lista użytkowników</h1>
+        </div>
+        <div class="col-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Gracz</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Opcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr class="table-active">
+                        <td>{{ user.name }}</td>
+                        <td>
+                        {% for role in user.roles %}
+                            <span class="badge bg-primary">{{ role|role_name }}</span>{% if not loop.last %} {% endif %}
+                        {% endfor %}
+                        </td>
+                        <td>
+                        {% if 'ROLE_DM' not in user.roles %}
+                            <a 
+                                href="{{ path('admin_grant_dm', {id: user.id}) }}" 
+                                class="text-success"
+                                data-bs-toggle="tooltip" 
+                                data-bs-placement="bottom" 
+                                data-bs-original-title="Nadaj rolę Mistrza Gry"
+                            >
+                                <i class="bi bi-person-up"></i>
+                            </a>
+                        {% else %}
+                            <a 
+                                href="{{ path('admin_remove_dm', {id: user.id}) }}"
+                                class="text-danger"
+                                data-bs-toggle="tooltip" 
+                                data-bs-placement="bottom" 
+                                data-bs-original-title="Odbierz rolę Mistrza Gry"
+                            >
+                                <i class="bi bi-person-down"></i>
+                            </a>
+                        {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

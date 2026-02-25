@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logowanie{% endblock %}
+
+{% block body %}
+    <div class="container-xl mt-5">
+        <div class="row">
+            <div class="col-12 py-5">
+                <div class="col-4 mx-auto">
+                    <img src="{{ asset('assets/images/Gamesplanner-logo.png') }}" 
+                        alt="GammesPlanner Logo"
+                        class="mx-auto d-block login-logo"
+                    >
+                </div>
+                <h1 class="mb-3 text-center text-capitalize">Please sign in</h1>
+                <div class="d-grid gap-2 col-4 mx-auto">
+                    <form method="post">
+                        {% if error %}
+                            <div class="text text-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                        {% endif %}
+
+                        {% if app.user %}
+                            <div class="mb-3">
+                                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
+                            </div>
+                        {% endif %}
+
+                        
+                        <div class="form-floating mb-3">
+                            <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" placeholder="name@example.com" autocomplete="email" required autofocus>
+                            <label for="username">Email address</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" id="password" name="_password" class="form-control" placeholder="Password" autocomplete="current-password" required>
+                            <label for="password">Password</label>
+                        </div>
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+                        <div class="d-grid gap-2">
+                        <button class="btn btn-lg btn-primary" type="submit">
+                            Zaloguj się
+                        </button>
+                        </div>
+                    </form>
+                    <a href="{{ path('app_register') }}" class="btn btn-outline-primary">
+                        Zarejestruj się
+                    </a>
+                    <a href="{{ path('connect_google') }}" class="btn btn-outline-info">
+                        <i class="bi bi-google"></i> zaloguj przez Google
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
