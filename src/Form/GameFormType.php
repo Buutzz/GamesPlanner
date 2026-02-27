@@ -23,7 +23,6 @@ class GameFormType extends AbstractType
             ->add('owner', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'name',
-                'data' => $options['current_user'],
             ])
             ->add('players', EntityType::class, [
                 'class' => User::class,

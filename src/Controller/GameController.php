@@ -53,9 +53,8 @@ final class GameController extends AbstractController
     public function create(Request $request): Response
     {
         $game = new Game();
-        $form = $this->createForm(GameFormType::class, $game,[
-            'current_user' => $this->getUser(),
-        ]);
+        $game->setOwner($this->getUser());
+        $form = $this->createForm(GameFormType::class, $game);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
