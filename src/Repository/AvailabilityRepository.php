@@ -53,4 +53,37 @@ class AvailabilityRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute();
     }
+
+    public function insertMonthForUserRaw(int $userId, \DateTimeInterface $start, \DateTimeInterface $end): void
+    {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = "
+            INSERT INTO availability (user_id, available, date, locked)
+            SELECT :user_id, true, date::date, false
+            FROM generate_series(:start_date::date, :end_date::date, interval '1 day') AS date
+            ON CONFLICT (user_id, date) DO NOTHING
+        ";
+
+        $conn->executeStatement($sql, [
+            'user_id' => $userId,
+            'start_date' => $start->format('Y-m-d'),
+            'end_date' => $end->format('Y-m-d'),
+        ]);
+    }
+
+    public function markMonthAvailableForUser(int $userId, \DateTimeInterface $start, \DateTimeInterface $end): int
+    {
+        return $this->createQueryBuilder('a')
+            ->update()
+            ->set('a.available', ':available')
+            ->where('a.user = :user')
+            ->andWhere('a.date BETWEEN :start AND :end')
+            ->setParameter('available', true)
+            ->setParameter('user', $userId)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->execute();
+    }
 }

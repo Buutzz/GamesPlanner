@@ -10,6 +10,7 @@ export function initCalendar(el) {
     const availableDates = JSON.parse(el.dataset.availableDates || '[]');
     const commonDates = JSON.parse(el.dataset.commonDates || '[]');
     const sessionDates = JSON.parse(el.dataset.sessionDates || '[]');
+    const hasAvailability = el.dataset.hasAvailability || 0;
 
     const baseOptions = {
         plugins: [dayGridPlugin, bootstrap5Plugin, interactionPlugin],
@@ -43,6 +44,12 @@ export function initCalendar(el) {
         customOptions = {
             ...customOptions,
 
+            customButtons: {
+                markWholeMonth: {
+                    text: ' ',
+                }
+            },
+            headerToolbar: { left: 'title', center: 'markWholeMonth', right: 'today,prev,next' },
             dayCellClassNames: function(info) {
 
                 if (info.isOther) {
@@ -190,4 +197,13 @@ export function initCalendar(el) {
         },
         ...customOptions });
     calendar.render();
+
+    const btn = el.querySelector('.fc-markWholeMonth-button');
+    if (btn) {
+        btn.id = 'markMonthBtn';
+        btn.className = 'btn btn-secondary btn-sm';
+        btn.setAttribute('data-has-availability', hasAvailability);
+
+        btn.innerHTML = '<i class="bi bi-calendar2-check-fill"></i> Zaznacz cały miesiąc';
+    }
 }

@@ -37,7 +37,8 @@ final class AvailabilityController extends AbstractController
         );
     
         return $this->render('availability/calendar.html.twig', [
-            'availableDates' => $dates
+            'availableDates' => $dates,
+            'now' => new \DateTimeImmutable(),
         ]);
     }
 
@@ -70,5 +71,26 @@ final class AvailabilityController extends AbstractController
         return $this->json([
             'available' => $available
         ]);
+    }
+
+    #[Route('/availability/mark-month', name: 'availability_mark_month', methods: ['POST'])]
+    public function markMonth(Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('mark_month', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $start = new \DateTimeImmutable('2026-02-01');
+        $end = new \DateTimeImmutable('2026-02-28');
+        $userId = $this->getUser()->getId();
+
+        $this->availabilityRepository
+            ->insertMonthForUserRaw($userId, $start, $end);
+        $this->availabilityRepository
+            ->markMonthAvailableForUser($userId, $start, $end);
+
+        $this->addFlash('success', 'Miesiąc został ustawiony jako dostępny.');
+
+        return $this->redirectToRoute('availability_calendar');
     }
 }

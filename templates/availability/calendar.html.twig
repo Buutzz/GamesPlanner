@@ -3,17 +3,20 @@
 {% block title %}Twoja dostępność{% endblock %}
 
 {% block body %}
+{% set currentMonth = now|date('Y-m') %}
+{% set monthHasAvailability = availableDates|filter(d => d[:7] == currentMonth)|length > 0 %}
 <div>
     <div class="container-xl mt-1">
         <div class="row gy-5">
             <div class="col-12">
                 <h1>Twoja dostępność</h1>
             </div>
-            <div class="col-12 py-5 mb-5 card text-white bg-primary" id="calendar-wrapper">
+            <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
                 <div 
                     id="calendar" 
                     class="js-calendar" 
-                    data-type="availability" 
+                    data-type="availability"
+                    data-has-availability="{{ monthHasAvailability ? '1' : '0' }}"
                     data-available-dates='{{ availableDates|json_encode|raw }}'
                     data-options='{
                         "initialView": "dayGridMonth",
@@ -23,5 +26,33 @@
             </div>
         </div>
     </div>
+</div>
+<form id="markMonthForm"
+      method="post"
+      action="{{ path('availability_mark_month') }}">
+    <input type="hidden" name="_token"
+           value="{{ csrf_token('mark_month') }}">
+</form>
+<div class="modal fade" id="confirmMonthModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Potwierdzenie</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Ten miesiąc ma już ustawioną dostępność.
+        Czy chcesz nadpisać ją ponownie?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Anuluj
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmMonthBtn">
+          Tak, nadpisz
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

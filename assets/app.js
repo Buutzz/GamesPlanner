@@ -7,18 +7,37 @@
 import './styles/app.scss';
 import 'bootstrap';
 import { initCalendar } from './calendar';
-import { Tooltip } from 'bootstrap';
+import { Tooltip, Modal } from 'bootstrap';
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.js-calendar').forEach(el => {
-        initCalendar(el);
-    });
+    // Initialize calendars
+    document.querySelectorAll('.js-calendar').forEach(el => initCalendar(el));
 
-    const tooltipTriggerList = [].slice.call(
-        document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-
-    tooltipTriggerList.forEach(el => {
+    // Initialize tooltips
+    Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]')).forEach(el => {
         new Tooltip(el);
     });
+
+    // Handle "Mark Month" button logic
+    const markBtn = document.getElementById('markMonthBtn');
+    const form = document.getElementById('markMonthForm');
+    const modalEl = document.getElementById('confirmMonthModal');
+    const confirmBtn = document.getElementById('confirmMonthBtn');
+
+    if (markBtn && form && modalEl) {
+        const modal = new Modal(modalEl);
+
+        markBtn.addEventListener('click', () => {
+            const hasAvailability = markBtn.dataset.hasAvailability === '1';
+            if (!hasAvailability) {
+                form.submit();
+            } else {
+                modal.show();
+            }
+        });
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => form.submit());
+        }
+    }
 });
