@@ -19,7 +19,7 @@ export function initCalendar(el) {
         timeZone: 'local',
         headerToolbar: { left: 'title', center: '', right: 'today,prev,next' },
         showNonCurrentDates: false,
-        height: 450,
+        height: 600,
         fixedWeekCount: false,
         expandRows: true,
     };
