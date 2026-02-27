@@ -43,21 +43,21 @@ export function initCalendar(el) {
         customOptions = {
             ...customOptions,
 
-            dayCellDidMount: function(info) {
+            dayCellClassNames: function(info) {
+
+                if (info.isOther) {
+                    return [];
+                }
+
                 const date = info.date.getFullYear() + '-' +
                     String(info.date.getMonth() + 1).padStart(2,'0') + '-' +
                     String(info.date.getDate()).padStart(2,'0');
 
-                info.el.classList.remove(
-                    'fc-day-marked-available',
-                    'fc-day-marked-unavailable'
-                );
                 if (availableDates.includes(date)) {
-                    info.el.classList.add('fc-day-marked-available');
+                    return ['fc-day-marked-available'];
                 }
-                else {
-                    info.el.classList.add('fc-day-marked-unavailable');
-                }
+
+                return ['fc-day-marked-unavailable'];
             },
 
             dateClick: function(info) {
