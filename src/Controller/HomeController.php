@@ -7,26 +7,72 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\GameSessionRepository;
+use App\Repository\GameRepository;
+use App\Repository\AvailabilityRepository;
 use App\Entity\GameSession;
 
 class HomeController extends AbstractController
 {
+
+
+    private $gameRepository;
+    private $availabilityRepository;
+    private $gameSessionRepository;
+
+    /**
+     * Class constructor.
+     */
+    public function __construct(GameRepository $gameRepository, AvailabilityRepository $availabilityRepository, GameSessionRepository $gameSessionRepository)
+    {
+        $this->gameRepository = $gameRepository;
+        $this->availabilityRepository = $availabilityRepository;
+        $this->gameSessionRepository = $gameSessionRepository;
+    }
+
     #[Route('/', name: 'app_home')]
     public function index(): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        return $this->render('home/index.html.twig', [
+        $parameters = [
             'user'      => $user,
             'userGames' => $user->getGames()
-        ]);
+        ];
+
+        if ($this->isGranted('ROLE_DM')) { 
+            $games = $this->gameRepository->findAll();
+            $commonDates = $this->availabilityRepository->findCommonAvailableDatesForGames($games, new \DateTime());
+
+            $gameOptions = [];
+            foreach ($games as $game) {
+                $gameOptions[] = ['id'=>$game->getId(), 'name'=>$game->getName()];
+            }
+
+            $sessionsDaysRaw = $this->gameSessionRepository->findAll();
+            
+            $sessionsDays = array_column(
+                array_map(function ($row) {
+                    return [
+                        'date' => $row->getDate()->format('Y-m-d'),
+                        'gameId' => $row->getGame()->getId()
+                    ];
+                }, $sessionsDaysRaw),
+                'gameId',
+                'date'
+            );
+            $parameters['commonDates'] = $commonDates;
+            $parameters['gameOptions'] = $gameOptions;
+            $parameters['sessionsDays'] = $sessionsDays;
+        }
+
+        return $this->render('home/index.html.twig', $parameters);
     }
 
     #[Route('/calendar/events', name: 'calendar_events')]
-    public function events(GameSessionRepository $gameSessionRepository): JsonResponse
+    public function events(): JsonResponse
     {
-        $sessions = $gameSessionRepository->findAll();
+        $sessions = $this->gameSessionRepository->findAll();
 
         $plannedSessions = [];
 
@@ -44,7 +90,6 @@ class HomeController extends AbstractController
                 ];
             }
         }
-
         return $this->json($plannedSessions);
     }
 

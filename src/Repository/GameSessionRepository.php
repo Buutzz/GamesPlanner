@@ -31,17 +31,4 @@ class GameSessionRepository extends ServiceEntityRepository
 
         return count($result) === 0;
     }
-
-    public function findAllPlannedSessionForThisMonth(): array
-    {
-        $start = new \DateTime('first day of this month midnight');
-        $end   = new \DateTime('last day of this month 23:59:59');
-
-        return $this->createQueryBuilder('s')
-            ->where('s.date BETWEEN :start and :end')
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
-            ->getQuery()
-            ->getResult();
-    }
 }

@@ -31,4 +31,30 @@
             </div>
         </div>
     </div>
+<script>
+    window.commonDates = {{ commonDates|json_encode|raw }};
+    window.gameOptions = {{ gameOptions|json_encode|raw }};
+    window.sessionsDays = {{ sessionsDays|json_encode|raw }};
+</script>
+<div class="modal fade" id="cancelSessionModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Potwierdzenie</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Czy na pewno chcesz odwołać te sesję?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Anuluj
+        </button>
+        <button type="button" class="btn btn-danger" id="cancelSessionBtn">
+          Tak, odwołaj
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

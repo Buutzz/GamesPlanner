@@ -86,4 +86,41 @@ class AvailabilityRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute();
     }
+
+    public function findCommonAvailableDatesForGames(array $games, \DateTimeInterface $month): array
+    {
+        $start = (new \DateTimeImmutable($month->format('Y-m-01')))->setTime(0, 0, 0);
+        $end = $start->modify('last day of this month')->setTime(23, 59, 59);
+
+        $dates = [];
+
+        foreach ($games as $game) {
+            $players = $game->getPlayers()->toArray();
+
+            if (count($players) === 0) continue;
+
+            // Pobranie wspólnych dostępnych dni dla graczy danej gry
+            $qb = $this->createQueryBuilder('a')
+                ->select('a.date')
+                ->andWhere('a.user IN (:users)')
+                ->andWhere('a.available = true')
+                ->andWhere('a.date BETWEEN :start AND :end')
+                ->setParameter('users', $players)
+                ->setParameter('start', $start)
+                ->setParameter('end', $end)
+                ->groupBy('a.date')
+                ->having('COUNT(DISTINCT a.user) = :userCount')
+                ->setParameter('userCount', count($players));
+
+            $result = $qb->getQuery()->getResult();
+
+            foreach ($result as $row) {
+                $dateStr = $row['date']->format('Y-m-d');
+                if (!isset($dates[$dateStr])) $dates[$dateStr] = [];
+                $dates[$dateStr][$game->getId()] = true; // gra jest możliwa tego dnia
+            }
+        }
+
+        return $dates;
+    }
 }

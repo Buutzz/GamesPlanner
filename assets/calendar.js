@@ -3,6 +3,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 import plLocale from '@fullcalendar/core/locales/pl';
 import interactionPlugin from '@fullcalendar/interaction';
+import { Modal } from 'bootstrap';
 
 export function initCalendar(el) {
     const options = JSON.parse(el.dataset.options || '{}');
@@ -172,6 +173,100 @@ export function initCalendar(el) {
                 });
             },
         };
+    }
+
+     if (type === 'home') {
+        customOptions = {
+            ...customOptions,
+
+            dayCellDidMount: function(arg) {
+                let dateStr = arg.date.getFullYear() + '-' +
+                    String(arg.date.getMonth() + 1).padStart(2,'0') + '-' +
+                    String(arg.date.getDate()).padStart(2,'0');
+                let cellEl = arg.el;
+
+                let gamesForDay = window.commonDates[dateStr];
+                if (!gamesForDay) return;
+
+                let sessionsOfTheDay = window.sessionsDays[dateStr] || false;
+                let isAvailable = false;
+                window.gameOptions.forEach(game => {
+                    if (sessionsOfTheDay) {
+                        isAvailable = sessionsOfTheDay !== game.id ? true : false;
+                    }
+
+                    let checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `game-${game.id}-${dateStr}`;
+                    checkbox.classList = 'form-check-input';
+                    checkbox.disabled = isAvailable;
+                    checkbox.checked = !isAvailable === true && sessionsOfTheDay === game.id ? true : false;
+
+                    let label = document.createElement('label');
+                    label.htmlFor = checkbox.id;
+                    label.classList = 'form-check-label';
+                    label.textContent = game.name;
+
+                    checkbox.addEventListener('change', function(e) {
+                        if (e.target.checked) {
+                            let url = `/games/${game.id}/reserve`;
+
+                            fetch(url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'date=' + dateStr
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (!data.success) {
+                                    alert(data.message);
+                                    e.target.checked = false;
+                                } else {
+                                    gamesForDay[game.id] = true;
+                                    window.location.reload();
+                                }
+                            });
+
+                            return;
+                        }
+
+                        e.preventDefault();
+                        e.target.checked = true;
+
+                        const modalElement = document.getElementById('cancelSessionModal');
+                        const cancelModal = new Modal(modalElement);
+                        const confirmBtn = document.getElementById('cancelSessionBtn');
+                        confirmBtn.onclick = function() {
+                            fetch(`/games/${game.id}/cancel`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: 'date=' + dateStr
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (!data.success) {
+                                    alert(data.message);
+                                } else {
+                                    e.target.checked = false;
+                                    window.location.reload();
+                                }
+                            });
+
+                            cancelModal.hide();
+                        };
+                        cancelModal.show();
+                    });
+
+                    let div = document.createElement('div');
+                    div.classList = 'form-check'
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                   
+                    cellEl.querySelector('.fc-daygrid-day-bottom').appendChild(div);
+                });
+            }
+        }
+
     }
 
     const calendar = new Calendar(el, { 
