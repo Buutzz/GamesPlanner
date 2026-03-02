@@ -189,8 +189,22 @@ export function initCalendar(el) {
                 if (!gamesForDay) return;
 
                 let sessionsOfTheDay = window.sessionsDays[dateStr] || false;
-                let isAvailable = false;
+                
+                let wrapper = document.createElement('div');
+                wrapper.classList = 'games-wrapper';
+                wrapper.style.display = 'none';
+
+                let toggleBtn = document.createElement('button');
+                toggleBtn.type = 'button';
+                toggleBtn.innerHTML = '<i class="bi bi-clipboard2-check-fill"></i>';
+                toggleBtn.classList = 'btn btn-outline-info btn-sm';
+
+                toggleBtn.addEventListener('click', function() {
+                    wrapper.style.display = wrapper.style.display === 'none' ? 'block' : 'none';
+                });
                 window.gameOptions.forEach(game => {
+
+                    let isAvailable = false;
                     if (sessionsOfTheDay) {
                         isAvailable = sessionsOfTheDay !== game.id ? true : false;
                     }
@@ -261,9 +275,12 @@ export function initCalendar(el) {
                     div.classList = 'form-check'
                     div.appendChild(checkbox);
                     div.appendChild(label);
-                   
-                    cellEl.querySelector('.fc-daygrid-day-bottom').appendChild(div);
+                    wrapper.appendChild(div);
                 });
+
+                let bottom = cellEl.querySelector('.fc-daygrid-day-bottom');
+                bottom.appendChild(toggleBtn);
+                bottom.appendChild(wrapper);
             }
         }
 
