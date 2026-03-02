@@ -6,6 +6,10 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { Modal } from 'bootstrap';
 
 export function initCalendar(el) {
+
+    let isAvailabilityView = false;
+    let calendar;
+
     const options = JSON.parse(el.dataset.options || '{}');
     const type = el.dataset.type || 'default';
     const availableDates = JSON.parse(el.dataset.availableDates || '[]');
@@ -24,6 +28,7 @@ export function initCalendar(el) {
         height: 600,
         fixedWeekCount: false,
         expandRows: true,
+        themeSystem: 'bootstrap5',
     };
 
     let customOptions = {};
@@ -175,122 +180,168 @@ export function initCalendar(el) {
         };
     }
 
-     if (type === 'home') {
+    if (type === 'home-dm') {
         customOptions = {
             ...customOptions,
 
-            dayCellDidMount: function(arg) {
-                let dateStr = arg.date.getFullYear() + '-' +
-                    String(arg.date.getMonth() + 1).padStart(2,'0') + '-' +
-                    String(arg.date.getDate()).padStart(2,'0');
-                let cellEl = arg.el;
+            customButtons: {
+                switchDisplayModeBtn: {
+                    text: '',
+                    click: function() {
+                        isAvailabilityView = !isAvailabilityView;
+                        calendar.destroy();
+                        calendar.render();
 
-                let gamesForDay = window.commonDates[dateStr];
-                if (!gamesForDay) return;
+                    }
+                }
+            },
+            buttonIcons: {
+                switchDisplayModeBtn: 'arrow-left-right',
+            },
+            headerToolbar: { left: 'title', center: 'switchDisplayModeBtn', right: 'today,prev,next' },
 
-                let sessionsOfTheDay = window.sessionsDays[dateStr] || false;
-                
-                let wrapper = document.createElement('div');
-                wrapper.classList = 'games-wrapper';
-                wrapper.style.display = 'none';
+            dayCellDidMount: function(info) {
 
-                let toggleBtn = document.createElement('button');
-                toggleBtn.type = 'button';
-                toggleBtn.innerHTML = '<i class="bi bi-clipboard2-check-fill"></i>';
-                toggleBtn.classList = 'btn btn-outline-info btn-sm';
+                const dateStr = info.date.getFullYear() + '-' +
+                    String(info.date.getMonth() + 1).padStart(2,'0') + '-' +
+                    String(info.date.getDate()).padStart(2,'0');
+                if (isAvailabilityView) {
+                    renderAvailabilityView(info, dateStr);
+                    return;
+                }
 
-                toggleBtn.addEventListener('click', function() {
-                    wrapper.style.display = wrapper.style.display === 'none' ? 'block' : 'none';
-                });
-                window.gameOptions.forEach(game => {
+                renderNormalView(info, dateStr);
+            }
+        }
+        
 
-                    if (gamesForDay[game.id] !== true) {
+        function renderNormalView(arg, dateStr) {
+            let cellEl = arg.el;
+
+            let gamesForDay = window.commonDates[dateStr];
+            if (!gamesForDay) return;
+
+            let sessionsOfTheDay = window.sessionsDays[dateStr] || false;
+            
+            let wrapper = document.createElement('div');
+            wrapper.classList = 'games-wrapper';
+            wrapper.style.display = 'none';
+
+            let toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.innerHTML = '<i class="bi bi-clipboard2-check-fill"></i>';
+            toggleBtn.classList = 'btn btn-outline-info btn-sm';
+
+            toggleBtn.addEventListener('click', function() {
+                wrapper.style.display = wrapper.style.display === 'none' ? 'block' : 'none';
+            });
+            window.gameOptions.forEach(game => {
+
+                if (gamesForDay[game.id] !== true) {
+                    return;
+                }
+
+                let isAvailable = false;
+                if (sessionsOfTheDay) {
+                    isAvailable = sessionsOfTheDay !== game.id ? true : false;
+                }
+
+                let checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `game-${game.id}-${dateStr}`;
+                checkbox.classList = 'form-check-input';
+                checkbox.disabled = isAvailable;
+                checkbox.checked = !isAvailable === true && sessionsOfTheDay === game.id ? true : false;
+
+                let label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.classList = 'form-check-label';
+                label.textContent = game.name;
+
+                checkbox.addEventListener('change', function(e) {
+                    if (e.target.checked) {
+                        let url = `/games/${game.id}/reserve`;
+
+                        fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'date=' + dateStr
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.success) {
+                                alert(data.message);
+                                e.target.checked = false;
+                            } else {
+                                gamesForDay[game.id] = true;
+                                window.location.reload();
+                            }
+                        });
+
                         return;
                     }
 
-                    let isAvailable = false;
-                    if (sessionsOfTheDay) {
-                        isAvailable = sessionsOfTheDay !== game.id ? true : false;
-                    }
+                    e.preventDefault();
+                    e.target.checked = true;
 
-                    let checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `game-${game.id}-${dateStr}`;
-                    checkbox.classList = 'form-check-input';
-                    checkbox.disabled = isAvailable;
-                    checkbox.checked = !isAvailable === true && sessionsOfTheDay === game.id ? true : false;
+                    const modalElement = document.getElementById('cancelSessionModal');
+                    const cancelModal = new Modal(modalElement);
+                    const confirmBtn = document.getElementById('cancelSessionBtn');
+                    confirmBtn.onclick = function() {
+                        fetch(`/games/${game.id}/cancel`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'date=' + dateStr
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.success) {
+                                alert(data.message);
+                            } else {
+                                e.target.checked = false;
+                                window.location.reload();
+                            }
+                        });
 
-                    let label = document.createElement('label');
-                    label.htmlFor = checkbox.id;
-                    label.classList = 'form-check-label';
-                    label.textContent = game.name;
-
-                    checkbox.addEventListener('change', function(e) {
-                        if (e.target.checked) {
-                            let url = `/games/${game.id}/reserve`;
-
-                            fetch(url, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: 'date=' + dateStr
-                            })
-                            .then(r => r.json())
-                            .then(data => {
-                                if (!data.success) {
-                                    alert(data.message);
-                                    e.target.checked = false;
-                                } else {
-                                    gamesForDay[game.id] = true;
-                                    window.location.reload();
-                                }
-                            });
-
-                            return;
-                        }
-
-                        e.preventDefault();
-                        e.target.checked = true;
-
-                        const modalElement = document.getElementById('cancelSessionModal');
-                        const cancelModal = new Modal(modalElement);
-                        const confirmBtn = document.getElementById('cancelSessionBtn');
-                        confirmBtn.onclick = function() {
-                            fetch(`/games/${game.id}/cancel`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: 'date=' + dateStr
-                            })
-                            .then(r => r.json())
-                            .then(data => {
-                                if (!data.success) {
-                                    alert(data.message);
-                                } else {
-                                    e.target.checked = false;
-                                    window.location.reload();
-                                }
-                            });
-
-                            cancelModal.hide();
-                        };
-                        cancelModal.show();
-                    });
-
-                    let div = document.createElement('div');
-                    div.classList = 'form-check'
-                    div.appendChild(checkbox);
-                    div.appendChild(label);
-                    wrapper.appendChild(div);
+                        cancelModal.hide();
+                    };
+                    cancelModal.show();
                 });
 
-                let bottom = cellEl.querySelector('.fc-daygrid-day-bottom');
-                bottom.appendChild(toggleBtn);
-                bottom.appendChild(wrapper);
-            }
+                let div = document.createElement('div');
+                div.classList = 'form-check'
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                wrapper.appendChild(div);
+            });
+
+            let bottom = cellEl.querySelector('.fc-daygrid-day-bottom');
+            bottom.appendChild(toggleBtn);
+            bottom.appendChild(wrapper);
         }
 
+        function renderAvailabilityView(info, dateStr) {
+
+            const bottom = info.el.querySelector('.fc-daygrid-day-bottom');
+            bottom.innerHTML = '';
+
+            const dayData = window.playersAvailability?.[dateStr];
+            if (!dayData) return;
+
+            dayData.forEach(player => {
+                let div = document.createElement('div');
+                div.style.fontSize = '11px';
+
+                div.innerHTML = player.available
+                    ? `<i class="bi bi-circle-fill text-success"></i> ${player.name}`
+                    : `<i class="bi bi-circle-fill text-danger"></i> ${player.name}`;
+
+                bottom.appendChild(div);
+            });
+        }
     }
 
-    const calendar = new Calendar(el, { 
+    calendar = new Calendar(el, { 
         ...baseOptions, 
         ...options, 
         eventContent: function(arg) {

@@ -19,6 +19,17 @@
                 </div>
             </div>
             <div class="col-12 py-5 mb-5 card text-white bg-primary" id="calendar-wrapper">
+                {% if is_granted('ROLE_DM') %}
+                <div 
+                    id="calendar"
+                    class="js-calendar home-calendar"
+                    data-type="home-dm"
+                    data-options='{
+                        "initialView": "dayGridMonth",
+                        "events": "/calendar/events"
+                    }'
+                ></div>
+                {% else %}
                 <div 
                     id="calendar"
                     class="js-calendar home-calendar"
@@ -28,13 +39,16 @@
                         "events": "/calendar/events"
                     }'
                 ></div>
+                {% endif %}
             </div>
         </div>
     </div>
+{% if is_granted('ROLE_DM') %}
 <script>
-    window.commonDates = {{ commonDates|json_encode|raw }};
-    window.gameOptions = {{ gameOptions|json_encode|raw }};
-    window.sessionsDays = {{ sessionsDays|json_encode|raw }};
+    window.commonDates = {{ commonDates|default([])|json_encode|raw }};
+    window.gameOptions = {{ gameOptions|default([])|json_encode|raw }};
+    window.sessionsDays = {{ sessionsDays|default([])|json_encode|raw }};
+    window.playersAvailability = {{ playersAvailability|default([])|json_encode|raw }};
 </script>
 <div class="modal fade" id="cancelSessionModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -57,4 +71,5 @@
     </div>
   </div>
 </div>
+{% endif %}
 {% endblock %}

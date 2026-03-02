@@ -121,4 +121,48 @@ class AvailabilityRepository extends ServiceEntityRepository
 
         return $dates;
     }
+
+    public function findPlayersAvailabilityForCurrentMonth($users, \DateTimeInterface $month): array
+    {
+        $start = (new \DateTimeImmutable($month->format('Y-m-01')))->setTime(0, 0, 0);
+        $end = $start->modify('last day of this month')->setTime(23, 59, 59);
+
+        $availabilities = $this->createQueryBuilder('a')
+            ->join('a.user', 'u')
+            ->addSelect('u')
+            ->where('a.date BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+
+        $availabilityMap = [];
+
+        foreach ($availabilities as $availability) {
+            $dateKey = $availability->getDate()->format('Y-m-d');
+            $userId = $availability->getUser()->getId();
+
+            $availabilityMap[$dateKey][$userId] = true;
+        }
+
+        $result = [];
+        $period = new \DatePeriod(
+            $start,
+            new \DateInterval('P1D'),
+            $end
+        );
+
+        foreach ($period as $date) {
+            $dateKey = $date->format('Y-m-d');
+
+            foreach ($users as $user) {
+                $result[$dateKey][] = [
+                    'name' => $user->getName(),
+                    'available' => $availabilityMap[$dateKey][$user->getId()] ?? false
+                ];
+            }
+        }
+
+        return $result;
+    }
 }

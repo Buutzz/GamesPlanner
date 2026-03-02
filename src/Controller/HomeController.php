@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\GameSessionRepository;
 use App\Repository\GameRepository;
 use App\Repository\AvailabilityRepository;
+use App\Repository\UserRepository;
 use App\Entity\GameSession;
 
 class HomeController extends AbstractController
@@ -30,7 +31,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/', name: 'app_home')]
-    public function index(): Response
+    public function index(UserRepository $userRepository): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -61,9 +62,14 @@ class HomeController extends AbstractController
                 'gameId',
                 'date'
             );
+
+            $users = $userRepository->findAll();
+            $playersAvailability = $this->availabilityRepository->findPlayersAvailabilityForCurrentMonth($users, new \DateTime());
+
             $parameters['commonDates'] = $commonDates;
             $parameters['gameOptions'] = $gameOptions;
             $parameters['sessionsDays'] = $sessionsDays;
+            $parameters['playersAvailability'] = $playersAvailability;
         }
 
         return $this->render('home/index.html.twig', $parameters);
