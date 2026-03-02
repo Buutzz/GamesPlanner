@@ -204,6 +204,10 @@ export function initCalendar(el) {
                 });
                 window.gameOptions.forEach(game => {
 
+                    if (gamesForDay[game.id] !== true) {
+                        return;
+                    }
+
                     let isAvailable = false;
                     if (sessionsOfTheDay) {
                         isAvailable = sessionsOfTheDay !== game.id ? true : false;
