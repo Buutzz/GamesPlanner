@@ -115,3 +115,22 @@ footer {
 :root {
     --fc-today-bg-color: inherit !important;
 }
+
+.calendar-legend {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+.calendar-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.calendar-legend .legend-color {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #999;
+}

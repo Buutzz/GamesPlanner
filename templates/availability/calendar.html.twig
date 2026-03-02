@@ -8,22 +8,36 @@
 <div>
     <div class="container-xl mt-1">
         <div class="row gy-5">
-            <div class="col-12">
-                <h1>Twoja dostępność</h1>
-            </div>
-            <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
-                <div 
-                    id="calendar" 
-                    class="js-calendar" 
-                    data-type="availability"
-                    data-has-availability="{{ monthHasAvailability ? '1' : '0' }}"
-                    data-available-dates='{{ availableDates|json_encode|raw }}'
-                    data-options='{
-                        "initialView": "dayGridMonth",
-                        "events": "/calendar/events"
-                    }'
-                ></div>
-            </div>
+          <div class="col-12">
+              <h1>Twoja dostępność</h1>
+          </div>
+          <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
+              <div 
+                  id="calendar" 
+                  class="js-calendar" 
+                  data-type="availability"
+                  data-has-availability="{{ monthHasAvailability ? '1' : '0' }}"
+                  data-available-dates='{{ availableDates|json_encode|raw }}'
+                  data-options='{
+                      "initialView": "dayGridMonth",
+                      "events": "/calendar/events"
+                  }'
+              ></div>
+              <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #c8f7c5;"></div>
+                    <span>Mogę grać</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #f7c5c5;"></div>
+                    <span>Nie mogę grać</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4caf50;"></div>
+                    <span>Dzień sesji</span>
+                </div>
+              </div>
+          </div>
         </div>
     </div>
 </div>

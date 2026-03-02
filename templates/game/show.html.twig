@@ -42,7 +42,7 @@
             </div>
         </div>
         {% if game.active %}
-        <div class="col-12 py-5 mb-5 card text-white bg-primary" id="calendar-wrapper">
+        <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
             <div 
                 id="calendar"
                 class="js-calendar"
@@ -54,6 +54,20 @@
                     "events": "/calendar/events"
                 }'
             ></div>
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #c8f7c5;"></div>
+                    <span>Mogę grać</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #f7c5c5;"></div>
+                    <span>Nie mogę grać</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4caf50;"></div>
+                    <span>Dzień sesji</span>
+                </div>
+            </div>
         </div>
         {% endif %}
     </div>
