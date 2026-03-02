@@ -44,7 +44,8 @@ body{
     text-decoration: none !important;
 }
 
-.fc-theme-standard td, .fc-theme-standard th{
+.fc-theme-standard td, .fc-theme-standard th,
+.fc-theme-bootstrap5 td, .fc-theme-bootstrap5 th{
     border-color:var(--bs-primary-text-emphasis) !important;
 }
 
