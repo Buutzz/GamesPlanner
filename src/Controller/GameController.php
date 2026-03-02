@@ -100,7 +100,7 @@ final class GameController extends AbstractController
     public function show($id, UserRepository $userRepository): Response
     {
         $game = $this->gameRepository->find($id);
-        $players = $game->getPlayers()->toArray();
+        $players = [...$game->getPlayers(), $game->getOwner()];
 
         $playersWithoutAvailibility = $userRepository
             ->findUsersWithoutAvailabilityForMonth($game, new \DateTime());
@@ -131,7 +131,7 @@ final class GameController extends AbstractController
     public function reserve(Game $game, Request $request): JsonResponse
     {
         $date = new \DateTime($request->request->get('date'));
-        $players = $game->getPlayers()->toArray();
+        $players = [...$game->getPlayers(), $game->getOwner()];
 
         if (!$this->gameSessionRepository->isDateAvailableForGame($players, $date)) {
             return $this->json([
@@ -160,7 +160,7 @@ final class GameController extends AbstractController
     public function cancel(Game $game, Request $request): JsonResponse
     {
         $date = new \DateTime($request->request->get('date'));
-        $players = $game->getPlayers()->toArray();
+        $players = [...$game->getPlayers(), $game->getOwner()];
 
         $session = $this->gameSessionRepository->findOneBy([
             'game' => $game,

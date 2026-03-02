@@ -101,4 +101,15 @@ class Game
         $this->active = $active;
         return $this;
     }
+
+    public function getAllParticipants(): array
+    {
+        $participants = $this->players->toArray();
+
+        if (!in_array($this->owner, $participants, true)) {
+            $participants[] = $this->owner;
+        }
+
+        return $participants;
+    }
 }

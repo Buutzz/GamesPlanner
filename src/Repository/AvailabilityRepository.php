@@ -95,12 +95,10 @@ class AvailabilityRepository extends ServiceEntityRepository
         $dates = [];
 
         foreach ($games as $game) {
-            $players = $game->getPlayers()->toArray();
-
+            $players = $game->getAllParticipants();
             if (count($players) === 0) continue;
 
-            // Pobranie wspólnych dostępnych dni dla graczy danej gry
-            $qb = $this->createQueryBuilder('a')
+            $result = $this->createQueryBuilder('a')
                 ->select('a.date')
                 ->andWhere('a.user IN (:users)')
                 ->andWhere('a.available = true')
@@ -110,14 +108,14 @@ class AvailabilityRepository extends ServiceEntityRepository
                 ->setParameter('end', $end)
                 ->groupBy('a.date')
                 ->having('COUNT(DISTINCT a.user) = :userCount')
-                ->setParameter('userCount', count($players));
-
-            $result = $qb->getQuery()->getResult();
+                ->setParameter('userCount', count($players))
+                ->getQuery()
+                ->getResult();
 
             foreach ($result as $row) {
                 $dateStr = $row['date']->format('Y-m-d');
                 if (!isset($dates[$dateStr])) $dates[$dateStr] = [];
-                $dates[$dateStr][$game->getId()] = true; // gra jest możliwa tego dnia
+                $dates[$dateStr][$game->getId()] = true;
             }
         }
 
