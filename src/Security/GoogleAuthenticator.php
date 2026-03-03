@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
 class GoogleAuthenticator extends AbstractAuthenticator
 {
@@ -63,7 +64,10 @@ class GoogleAuthenticator extends AbstractAuthenticator
                 }
 
                 return $user;
-            })
+            }),
+            [
+                new RememberMeBadge(),
+            ]
         );
     }
 
