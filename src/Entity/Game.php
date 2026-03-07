@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\GameRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 #[ORM\Table(name: '`game`')]
@@ -29,6 +30,12 @@ class Game
 
     #[ORM\Column(type: 'boolean')]
     private bool $active = true;
+
+    #[ORM\Column(type: 'bigint', nullable: true)]
+    private ?string $discordChannelId;
+
+    #[ORM\Column(type: 'bigint', nullable: true)]
+    private ?string $discordRoleId;
 
     public function __construct()
     {
@@ -111,5 +118,27 @@ class Game
         }
 
         return $participants;
+    }
+
+    public function setDiscordChannelId(string $discordChannelId): self
+    {
+            $this->discordChannelId = $discordChannelId;
+            return $this;
+    }
+
+    public function getDiscordChannelId(): ?string
+    {
+        return $this->discordChannelId;
+    }
+
+    public function setDiscordRoleId(string $discordRoleId): self
+    {
+            $this->discordRoleId = $discordRoleId;
+            return $this;
+    }
+
+    public function getDiscordRoleId(): ?string
+    {
+        return $this->discordRoleId;
     }
 }

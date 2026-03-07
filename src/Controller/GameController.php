@@ -83,6 +83,8 @@ final class GameController extends AbstractController
             $game->setActive($form->get('active')->getData());
             $game->setOwner($form->get('owner')->getData());
             $game->setPlayers($form->get('players')->getData());
+            $game->setDiscordChannelId($form->get('discordChannelId')->getData());
+            $game->setDiscordRoleId($form->get('discordRoleId')->getData());
 
             $this->em->persist($game);
             $this->em->flush();
