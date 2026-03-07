@@ -134,3 +134,14 @@ footer {
     height: 20px;
     border: 1px solid #999;
 }
+
+input.form-control.no-arrows::-webkit-outer-spin-button,
+input.form-control.no-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input.form-control.no-arrows {
+    -moz-appearance: textfield;
+}

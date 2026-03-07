@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 
 class GameFormType extends AbstractType
 {
@@ -28,6 +29,22 @@ class GameFormType extends AbstractType
                 'class' => User::class,
                 'choice_label' => 'name',
                 'multiple' => true,
+            ])
+            ->add('discordChannelId', IntegerType::class, [
+                'label' => 'Discord channel ID',
+                'attr' => [
+                    'min' => 1,
+                    'step' => 1,
+                    'class' => 'no-arrows'
+                ]
+            ])
+            ->add('discordRoleId', IntegerType::class, [
+                'label' => 'Discord role ID',
+                'attr' => [
+                    'min' => 1,
+                    'step' => 1,
+                    'class' => 'no-arrows'
+                ]
             ])
         ;
     }
