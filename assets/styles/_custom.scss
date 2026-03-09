@@ -16,6 +16,7 @@ body{
 .fc-day-marked-available {
   background-color: #c8f7c5 !important;
   cursor: pointer;
+  position: relative;
 }
 
 .fc-day-marked-unavailable {
@@ -106,7 +107,18 @@ footer {
     gap: 1em;
 }
 
-.fc-event-main > div{
+.fc-event {
+    padding:2px;
+    background-image:linear-gradient(#63c3e0,#5bc0de 20%,#499ab2);
+    filter:none;
+}
+
+.fc-event:hover {
+    background-image: linear-gradient(#4ca1ba, #52adc8 40%, #56b4d1);
+    filter:none
+}
+
+.fc-event > div{
     display: flex;
     margin: 0.2em 0;
     gap: 10px;
@@ -136,12 +148,35 @@ footer {
 }
 
 input.form-control.no-arrows::-webkit-outer-spin-button,
-input.form-control.no-arrows::-webkit-inner-spin-button {
+input.form-control.no-arrows::-webkit-inner-spin-button,
+input#hourInput::-webkit-inner-spin-button,
+input#minuteInput::-webkit-inner-spin-button{
     -webkit-appearance: none;
     margin: 0;
 }
 
 /* Firefox */
-input.form-control.no-arrows {
+input.form-control.no-arrows,
+input#hourInput,
+input#minuteInput {
     -moz-appearance: textfield;
+}
+
+.fc-set-time {
+    position:absolute;
+    top:5px;
+    left:2px;
+    cursor:pointer;
+    padding: 2px 4px;
+}
+
+.fc-day-marked-unavailable .fc-set-time,
+.fc-day-disabled .fc-set-time{
+  display:none;
+}
+
+.availability-time-hours > button,
+.availability-time-minutes > button{
+    padding:2px;
+    width:100%;
 }

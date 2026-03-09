@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\AvailabilityRepository;
+use App\Repository\GameSessionRepository;
 use App\Entity\Availability;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,9 +36,18 @@ final class AvailabilityController extends AbstractController
             fn($a) => $a->getDate()->format('Y-m-d'),
             $records
         );
+
+        $datesTimes = array_reduce($records, function($carry, $r) {
+            $time = $r->getStartingTime()?->format('H:i') ?? null;
+            if ($time) {
+                $carry[$r->getDate()->format('Y-m-d')] = $time;
+            }
+            return $carry;
+        }, []);
     
         return $this->render('availability/calendar.html.twig', [
             'availableDates' => $dates,
+            'availableDatesTimes' => $datesTimes,
             'now' => new \DateTimeImmutable(),
         ]);
     }
@@ -92,5 +102,34 @@ final class AvailabilityController extends AbstractController
         $this->addFlash('success', 'Miesiąc został ustawiony jako dostępny.');
 
         return $this->redirectToRoute('availability_calendar');
+    }
+
+    #[Route('/availability/set-time', methods: ['POST'])]
+    public function setTime(Request $request, GameSessionRepository $gameSessionRepository,): JsonResponse
+    {
+        $date = new \DateTime($request->request->get('date'));
+        $time = $request->request->get('time');
+
+        $availability = $this->availabilityRepository->findOneBy([
+            'user' => $this->getUser(),
+            'date' => $date
+        ]);
+
+        if (!$availability) {
+            return $this->json(['success' => false]);
+        }
+
+        $availability->setStartingTime(\DateTime::createFromFormat('H:i', $time));
+
+        $dateSession = $gameSessionRepository->userHasSessionOnDate($this->getUser(), $date);
+
+        if ($dateSession) {
+            $timeObj = \DateTime::createFromFormat('H:i', $time);
+            $dateSession->setSessionStartingTime($timeObj);
+        }
+
+        $this->em->flush();
+
+        return $this->json(['success' => true]);
     }
 }

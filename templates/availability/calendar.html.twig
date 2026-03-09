@@ -6,36 +6,37 @@
 {% set currentMonth = now|date('Y-m') %}
 {% set monthHasAvailability = availableDates|filter(d => d[:7] == currentMonth)|length > 0 %}
 <div>
-    <div class="container-xl mt-1">
-        <div class="row gy-5">
-          <div class="col-12">
-              <h1>Twoja dostępność</h1>
-          </div>
-          <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
-              <div 
-                  id="calendar" 
-                  class="js-calendar" 
-                  data-type="availability"
-                  data-has-availability="{{ monthHasAvailability ? '1' : '0' }}"
-                  data-available-dates='{{ availableDates|json_encode|raw }}'
-                  data-options='{
-                      "initialView": "dayGridMonth",
-                      "events": "/calendar/events"
-                  }'
-              ></div>
-              <div class="calendar-legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: #c8f7c5;"></div>
-                    <span>Mogę grać</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background-color: #f7c5c5;"></div>
-                    <span>Nie mogę grać</span>
-                </div>
-              </div>
-          </div>
+  <div class="container-xl mt-1">
+      <div class="row gy-5">
+        <div class="col-12">
+            <h1>Twoja dostępność</h1>
         </div>
-    </div>
+        <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
+            <div 
+                id="calendar" 
+                class="js-calendar" 
+                data-type="availability"
+                data-has-availability="{{ monthHasAvailability ? '1' : '0' }}"
+                data-available-dates='{{ availableDates|json_encode|raw }}'
+                data-available-datesTimes='{{ availableDatesTimes|json_encode|raw }}'
+                data-options='{
+                    "initialView": "dayGridMonth",
+                    "events": "/calendar/events"
+                }'
+            ></div>
+            <div class="calendar-legend">
+              <div class="legend-item">
+                  <div class="legend-color" style="background-color: #c8f7c5;"></div>
+                  <span>Mogę grać</span>
+              </div>
+              <div class="legend-item">
+                  <div class="legend-color" style="background-color: #f7c5c5;"></div>
+                  <span>Nie mogę grać</span>
+              </div>
+            </div>
+        </div>
+      </div>
+  </div>
 </div>
 <form id="markMonthForm"
       method="post"
@@ -62,6 +63,55 @@
           Tak, nadpisz
         </button>
       </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="timeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Ustaw godzinę dostępności</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="d-flex justify-content-center align-items-center ">
+
+          <div class="text-center availability-time-hours">
+            <button class="btn btn-sm btn-outline-light time-hour-up">
+              <i class="bi bi-chevron-compact-up"></i>
+            </button>
+            <input type="number" id="hourInput" class="form-control text-center mt-1 mb-1" min="0" max="23" value="19">
+            <button class="btn btn-sm btn-outline-light time-hour-down">
+              <i class="bi bi-chevron-compact-down"></i>
+            </button>
+          </div>
+
+          <div class="fs-4">:</div>
+
+          <div class="text-center availability-time-minutes">
+            <button class="btn btn-sm btn-outline-light time-minute-up">
+              <i class="bi bi-chevron-compact-up"></i>
+            </button>
+            <input type="number" id="minuteInput" class="form-control text-center mt-1 mb-1" min="0" max="59" step="30" value="0">
+            <button class="btn btn-sm btn-outline-light time-minute-down">
+              <i class="bi bi-chevron-compact-down"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Anuluj
+        </button>
+        <button type="button" class="btn btn-primary" id="saveTimeBtn">
+          Zapisz
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\GameSession;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,5 +41,19 @@ class GameSessionRepository extends ServiceEntityRepository
             ->orderBy('s.date', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function userHasSessionOnDate(User $user, \DateTimeInterface $date): ?GameSession
+    {
+        return $this->createQueryBuilder('gs')
+            ->join('gs.game', 'g')
+            ->leftJoin('g.players', 'p')
+            ->where('gs.date = :date')
+            ->andWhere('g.owner = :user OR p = :user')
+            ->setParameter('date', $date)
+            ->setParameter('user', $user)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

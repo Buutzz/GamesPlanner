@@ -86,8 +86,8 @@ class HomeController extends AbstractController
             foreach ($sessions as $session) {
                 $plannedSessions[] = [
                     'title' => $session->getGame()->getName(),
-                    'start' => $session->getDate()->format('Y-m-d'),
-                    'allDay' => true,
+                    'start' => $session->getDate()->format('Y-m-d').'T'.($session->getSessionStartingTime()?->format('H:i:s') ?? '19:30:00'),
+                    'allDay' => false,
                     'extendedProps' => [
                         'icsUrl' => $this->generateUrl('session_calendar', [
                             'id' => $session->getId()
@@ -104,15 +104,17 @@ class HomeController extends AbstractController
     {
         $date = $gameSession->getDate();
 
-        $start = $date->format('Ymd');
+        $start = $date->format('Ymd').'T'.$gameSession->getSessionStartingTime()?->format('His');
+        $end = $date->format('Ymd').'T230000';
 
         $title = $gameSession->getGame()->getName();
 
         $ics = "BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
-DTSTART;VALUE=DATE:$start
-DTEND;VALUE=DATE:$start
+UID:GamesCalendar-Arbutz
+DTSTART;TZID=Europe/Warsaw:$start
+DTEND;TZID=Europe/Warsaw:$end
 SUMMARY:Sesja $title
 DESCRIPTION:Sesja RPG
 LOCATION: Discord 

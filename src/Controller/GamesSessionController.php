@@ -34,7 +34,7 @@ class GamesSessionController extends AbstractController
                 'id' => $session->getId(),
                 'game' => $game->getName(),
                 'date' => $session->getDate()->format('Y-m-d'),
-                'time' => "19:30", # @TODO: Add custom hour of session - by user availibility comment
+                'time' => $session->getSessionStartingTime()?->format('H:i') ?? "19:30",
                 'channel_id' => $game->getDiscordChannelId(),
                 'role_id' => $game->getDiscordRoleId(),
             ];

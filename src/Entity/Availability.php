@@ -28,6 +28,9 @@ class Availability
     #[ORM\Column]
     private bool $locked = false;
 
+    #[ORM\Column(type: 'time', nullable: true)]
+    private ?\DateTimeInterface $startingTime = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,18 @@ class Availability
     public function setLocked(bool $locked): static
     {
         $this->locked = $locked;
+
+        return $this;
+    }
+
+    public function getStartingTime(): ?\DateTimeInterface
+    {
+        return $this->startingTime;
+    }
+
+    public function setStartingTime(?\DateTimeInterface $startingTime): self
+    {
+        $this->startingTime = $startingTime;
 
         return $this;
     }

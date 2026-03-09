@@ -8,11 +8,13 @@ import { Modal } from 'bootstrap';
 export function initCalendar(el) {
 
     let isAvailabilityView = false;
+    let selectedDateForTime = null;
     let calendar;
 
     const options = JSON.parse(el.dataset.options || '{}');
     const type = el.dataset.type || 'default';
     const availableDates = JSON.parse(el.dataset.availableDates || '[]');
+    const availableDatesTimes = JSON.parse(el.dataset.availableDatestimes || '[]');
     const commonDates = JSON.parse(el.dataset.commonDates || '[]');
     const sessionDates = JSON.parse(el.dataset.sessionDates || '[]');
     const hasAvailability = el.dataset.hasAvailability || 0;
@@ -74,6 +76,11 @@ export function initCalendar(el) {
             },
 
             dateClick: function(info) {
+
+                if (info.jsEvent.target.closest('.fc-set-time')) {
+                    return;
+                }
+                
                 if (info.dayEl.dataset.hasEvent === 'true') {
                     const date = info.date.getFullYear() + '-' +
                                  String(info.date.getMonth() + 1).padStart(2,'0') + '-' +
@@ -100,6 +107,42 @@ export function initCalendar(el) {
                         info.dayEl.classList.add('fc-day-marked-unavailable');
                     }
                 });
+            },
+            dayCellDidMount: function(info) {
+
+                const btn = document.createElement("button");
+                btn.innerHTML= '<i class="bi bi-clock-fill"></i>';
+                btn.classList = "fc-set-time btn btn-sm btn-warning";
+
+                btn.addEventListener("click", function(e) {
+                    e.stopPropagation();
+
+                    selectedDateForTime = info.el.dataset.date;
+                    if (availableDatesTimes[selectedDateForTime]) {
+                        let existingTime = availableDatesTimes[selectedDateForTime];
+
+                        let [hour, minute] = existingTime.split(':');
+                        document.getElementById('hourInput').value = parseInt(hour);
+                        document.getElementById('minuteInput').value = parseInt(minute);
+                    }
+
+                    const modal = new Modal(document.getElementById('timeModal'));
+                    modal.show();
+                });
+                info.el.appendChild(btn);
+                
+                if (availableDatesTimes[info.el.dataset.date]) {
+                    let dateTime = availableDatesTimes[info.el.dataset.date];
+
+                    const badge = document.createElement('div');
+                    badge.className = 'badge bg-secondary text-white';
+                    badge.style.fontSize = '10px';
+                    badge.style.marginTop = '2px';
+                    badge.innerHTML = `<i class="bi bi-clock-fill"></i> ${dateTime}`;
+
+                    const bottom = info.el.querySelector('.fc-daygrid-day-bottom');
+                    bottom.appendChild(badge);
+                }
             }
         };
     }
@@ -347,8 +390,17 @@ export function initCalendar(el) {
         eventContent: function(arg) {
             let container = document.createElement('div');
 
+            let startTime = '';
+
+            if (arg.event.start) {
+                const h = arg.event.start.getHours().toString().padStart(2,'0');
+                const m = arg.event.start.getMinutes().toString().padStart(2,'0');
+                startTime = `${h}:${m} `;
+            }
+
             let title = document.createElement('div');
-            title.innerText = arg.event.title;
+            title.classList = 'text-primary';
+            title.innerText = startTime + arg.event.title;
 
             if (arg.event.extendedProps.icsUrl) {
                 let link = document.createElement('a');
@@ -373,4 +425,60 @@ export function initCalendar(el) {
 
         btn.innerHTML = '<i class="bi bi-calendar2-check-fill"></i> Zaznacz cały miesiąc';
     }
+
+    document.getElementById('saveTimeBtn').addEventListener('click', function() {
+
+        const hour = String(hourInput.value).padStart(2,'0');
+        const minute = String(minuteInput.value).padStart(2,'0');
+
+        const time = `${hour}:${minute}`;
+
+        if (!time || !selectedDateForTime) return;
+
+        fetch('/availability/set-time', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'date=' + selectedDateForTime + '&time=' + time
+        })
+        .then(r => r.json())
+        .then(data => {
+
+            if (data.success) {
+
+                const modalEl = document.getElementById('timeModal');
+                Modal.getInstance(modalEl).hide();
+                alert('Zapisano preferowany czas!');
+                window.location.reload();
+            }
+        });
+    });
+
+    const hourInput = document.getElementById('hourInput');
+    const minuteInput = document.getElementById('minuteInput');
+
+    document.querySelector('.time-hour-up').onclick = () => {
+        hourInput.value = (parseInt(hourInput.value) + 1) % 24;
+    };
+
+    document.querySelector('.time-hour-down').onclick = () => {
+        hourInput.value = (parseInt(hourInput.value) + 23) % 24;
+    };
+
+    document.querySelector('.time-minute-up').onclick = () => {
+        let m = parseInt(minuteInput.value) + 30;
+        if (m >= 60) {
+            m = 0;
+            hourInput.value = (parseInt(hourInput.value) + 1) % 24;
+        }
+        minuteInput.value = m;
+    };
+
+    document.querySelector('.time-minute-down').onclick = () => {
+        let m = parseInt(minuteInput.value) - 30;
+        if (m < 0) {
+            m = 30;
+            hourInput.value = (parseInt(hourInput.value) + 23) % 24;
+        }
+        minuteInput.value = m;
+    };
 }

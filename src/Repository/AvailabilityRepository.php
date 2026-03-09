@@ -165,4 +165,15 @@ class AvailabilityRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    public function getStartingTimefromUsers(array $players): ?Availability
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.user IN (:players)')
+            ->andWhere('a.startingTime IS NOT NULL')
+            ->setParameter('players', $players)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
