@@ -43,12 +43,14 @@
             </div>
         </div>
     </div>
+<script>
+    window.playersAvailability = {{ playersAvailability|default([])|json_encode|raw }};
+</script>
 {% if is_granted('ROLE_DM') %}
 <script>
     window.commonDates = {{ commonDates|default([])|json_encode|raw }};
     window.gameOptions = {{ gameOptions|default([])|json_encode|raw }};
     window.sessionsDays = {{ sessionsDays|default([])|json_encode|raw }};
-    window.playersAvailability = {{ playersAvailability|default([])|json_encode|raw }};
 </script>
 <div class="modal fade" id="cancelSessionModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">

@@ -35,6 +35,26 @@ export function initCalendar(el) {
 
     let customOptions = {};
 
+    function renderAvailabilityView(info, dateStr) {
+
+        const bottom = info.el.querySelector('.fc-daygrid-day-bottom');
+        bottom.innerHTML = '';
+
+        const dayData = window.playersAvailability?.[dateStr];
+        if (!dayData) return;
+
+        dayData.forEach(player => {
+            let div = document.createElement('div');
+            div.style.fontSize = '11px';
+
+            div.innerHTML = player.available
+                ? `<i class="bi bi-circle-fill text-success"></i> ${player.name}`
+                : `<i class="bi bi-circle-fill text-danger"></i> ${player.name}`;
+
+            bottom.appendChild(div);
+        });
+    }
+
     if (type === 'availability' || type === 'game') {
         customOptions = {
             eventDidMount: function(info) {
@@ -223,6 +243,37 @@ export function initCalendar(el) {
         };
     }
 
+    if (type === 'home') {
+        customOptions = {
+            ...customOptions,
+            customButtons: {
+                switchDisplayModeBtn: {
+                    text: '',
+                    click: function() {
+                        isAvailabilityView = !isAvailabilityView;
+                        calendar.destroy();
+                        calendar.render();
+
+                    }
+                }
+            },
+            buttonIcons: {
+                switchDisplayModeBtn: 'arrow-left-right',
+            },
+            headerToolbar: { left: 'title', center: 'switchDisplayModeBtn', right: 'today,prev,next' },
+            dayCellDidMount: function(info) {
+
+                const dateStr = info.date.getFullYear() + '-' +
+                    String(info.date.getMonth() + 1).padStart(2,'0') + '-' +
+                    String(info.date.getDate()).padStart(2,'0');
+                if (isAvailabilityView) {
+                    renderAvailabilityView(info, dateStr);
+                    return;
+                }
+            }
+        }
+    }
+
     if (type === 'home-dm') {
         customOptions = {
             ...customOptions,
@@ -362,26 +413,6 @@ export function initCalendar(el) {
             bottom.appendChild(toggleBtn);
             bottom.appendChild(wrapper);
         }
-
-        function renderAvailabilityView(info, dateStr) {
-
-            const bottom = info.el.querySelector('.fc-daygrid-day-bottom');
-            bottom.innerHTML = '';
-
-            const dayData = window.playersAvailability?.[dateStr];
-            if (!dayData) return;
-
-            dayData.forEach(player => {
-                let div = document.createElement('div');
-                div.style.fontSize = '11px';
-
-                div.innerHTML = player.available
-                    ? `<i class="bi bi-circle-fill text-success"></i> ${player.name}`
-                    : `<i class="bi bi-circle-fill text-danger"></i> ${player.name}`;
-
-                bottom.appendChild(div);
-            });
-        }
     }
 
     calendar = new Calendar(el, { 
@@ -425,60 +456,62 @@ export function initCalendar(el) {
 
         btn.innerHTML = '<i class="bi bi-calendar2-check-fill"></i> Zaznacz cały miesiąc';
     }
+    const saveTimeBtn = document.getElementById('saveTimeBtn');
+    if (saveTimeBtn){
+        saveTimeBtn.addEventListener('click', function() {
 
-    document.getElementById('saveTimeBtn').addEventListener('click', function() {
+            const hour = String(hourInput.value).padStart(2,'0');
+            const minute = String(minuteInput.value).padStart(2,'0');
 
-        const hour = String(hourInput.value).padStart(2,'0');
-        const minute = String(minuteInput.value).padStart(2,'0');
+            const time = `${hour}:${minute}`;
 
-        const time = `${hour}:${minute}`;
+            if (!time || !selectedDateForTime) return;
 
-        if (!time || !selectedDateForTime) return;
+            fetch('/availability/set-time', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'date=' + selectedDateForTime + '&time=' + time
+            })
+            .then(r => r.json())
+            .then(data => {
 
-        fetch('/availability/set-time', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'date=' + selectedDateForTime + '&time=' + time
-        })
-        .then(r => r.json())
-        .then(data => {
+                if (data.success) {
 
-            if (data.success) {
-
-                const modalEl = document.getElementById('timeModal');
-                Modal.getInstance(modalEl).hide();
-                alert('Zapisano preferowany czas!');
-                window.location.reload();
-            }
+                    const modalEl = document.getElementById('timeModal');
+                    Modal.getInstance(modalEl).hide();
+                    alert('Zapisano preferowany czas!');
+                    window.location.reload();
+                }
+            });
         });
-    });
 
-    const hourInput = document.getElementById('hourInput');
-    const minuteInput = document.getElementById('minuteInput');
+        const hourInput = document.getElementById('hourInput');
+        const minuteInput = document.getElementById('minuteInput');
 
-    document.querySelector('.time-hour-up').onclick = () => {
-        hourInput.value = (parseInt(hourInput.value) + 1) % 24;
-    };
-
-    document.querySelector('.time-hour-down').onclick = () => {
-        hourInput.value = (parseInt(hourInput.value) + 23) % 24;
-    };
-
-    document.querySelector('.time-minute-up').onclick = () => {
-        let m = parseInt(minuteInput.value) + 30;
-        if (m >= 60) {
-            m = 0;
+        document.querySelector('.time-hour-up').onclick = () => {
             hourInput.value = (parseInt(hourInput.value) + 1) % 24;
-        }
-        minuteInput.value = m;
-    };
+        };
 
-    document.querySelector('.time-minute-down').onclick = () => {
-        let m = parseInt(minuteInput.value) - 30;
-        if (m < 0) {
-            m = 30;
+        document.querySelector('.time-hour-down').onclick = () => {
             hourInput.value = (parseInt(hourInput.value) + 23) % 24;
-        }
-        minuteInput.value = m;
-    };
+        };
+
+        document.querySelector('.time-minute-up').onclick = () => {
+            let m = parseInt(minuteInput.value) + 30;
+            if (m >= 60) {
+                m = 0;
+                hourInput.value = (parseInt(hourInput.value) + 1) % 24;
+            }
+            minuteInput.value = m;
+        };
+
+        document.querySelector('.time-minute-down').onclick = () => {
+            let m = parseInt(minuteInput.value) - 30;
+            if (m < 0) {
+                m = 30;
+                hourInput.value = (parseInt(hourInput.value) + 23) % 24;
+            }
+            minuteInput.value = m;
+        };
+}
 }

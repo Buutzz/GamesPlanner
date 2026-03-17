@@ -41,6 +41,10 @@ class HomeController extends AbstractController
             'userGames' => $user->getGames()
         ];
 
+        $users = $userRepository->findAll();
+        $playersAvailability = $this->availabilityRepository->findPlayersAvailabilityForCurrentMonth($users, new \DateTime());
+        $parameters['playersAvailability'] = $playersAvailability;
+
         if ($this->isGranted('ROLE_DM')) { 
             $games = $this->gameRepository->findAll();
             $commonDates = $this->availabilityRepository->findCommonAvailableDatesForGames($games, new \DateTime());
@@ -63,13 +67,9 @@ class HomeController extends AbstractController
                 'date'
             );
 
-            $users = $userRepository->findAll();
-            $playersAvailability = $this->availabilityRepository->findPlayersAvailabilityForCurrentMonth($users, new \DateTime());
-
             $parameters['commonDates'] = $commonDates;
             $parameters['gameOptions'] = $gameOptions;
             $parameters['sessionsDays'] = $sessionsDays;
-            $parameters['playersAvailability'] = $playersAvailability;
         }
 
         return $this->render('home/index.html.twig', $parameters);
