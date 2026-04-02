@@ -83,7 +83,7 @@ final class AvailabilityController extends AbstractController
         ]);
     }
 
-    #[Route('/availability/mark-month', name: 'availability_mark_month')]
+    #[Route('/availability/mark-month', name: 'availability_mark_month', methods: ['POST'])]
     public function markMonth(Request $request): Response
     {
         if (!$this->isCsrfTokenValid('mark_month', $request->request->get('_token'))) {
