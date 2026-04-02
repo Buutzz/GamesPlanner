@@ -83,15 +83,15 @@ final class AvailabilityController extends AbstractController
         ]);
     }
 
-    #[Route('/availability/mark-month', name: 'availability_mark_month', methods: ['POST'])]
+    #[Route('/availability/mark-month', name: 'availability_mark_month')]
     public function markMonth(Request $request): Response
     {
         if (!$this->isCsrfTokenValid('mark_month', $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
-        $start = new \DateTimeImmutable('2026-02-01');
-        $end = new \DateTimeImmutable('2026-02-28');
+        $start = (new \DateTimeImmutable((new \DateTime())->format('Y-m-01')))->setTime(0, 0, 0);
+        $end = $start->modify('last day of this month')->setTime(23, 59, 59);
         $userId = $this->getUser()->getId();
 
         $this->availabilityRepository
@@ -100,7 +100,7 @@ final class AvailabilityController extends AbstractController
             ->markMonthAvailableForUser($userId, $start, $end);
 
         $this->addFlash('success', 'Miesiąc został ustawiony jako dostępny.');
-
+        
         return $this->redirectToRoute('availability_calendar');
     }
 
