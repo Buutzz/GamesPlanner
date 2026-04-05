@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\AvailabilityRepository;
 use App\Repository\GameSessionRepository;
 use App\Entity\Availability;
+use App\Service\AvailabilityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,39 +19,28 @@ final class AvailabilityController extends AbstractController
 
     private $em;
     private $availabilityRepository;
+    private $availabilityService;
 
-    public function __construct(EntityManagerInterface $em, AvailabilityRepository $availabilityRepository)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        AvailabilityRepository $availabilityRepository,
+        AvailabilityService $availabilityService
+    ) {
         $this->em = $em;
         $this->availabilityRepository = $availabilityRepository;
+        $this->availabilityService = $availabilityService;
     }
 
     #[Route('/availability', name: 'availability_calendar')]
     public function calendar(): Response
     {
-        $user = $this->getUser();
-
-        $records = $this->availabilityRepository->findBy(['user' => $user]);
-
-        $dates = array_map(
-            fn($a) => $a->getDate()->format('Y-m-d'),
-            $records
-        );
-
-        $datesTimes = array_reduce($records, function($carry, $r) {
-            $time = $r->getStartingTime()?->format('H:i') ?? null;
-            if ($time) {
-                $carry[$r->getDate()->format('Y-m-d')] = $time;
-            }
-            return $carry;
-        }, []);
+        
     
         return $this->render('availability/calendar.html.twig', [
-            'availableDates' => $dates,
-            'availableDatesTimes' => $datesTimes,
-            'now' => new \DateTimeImmutable(),
+            
         ]);
     }
+    
 
     #[Route('/availability/toggle', name: 'availability_toggle', methods: ['POST'])]
     public function toogle(Request $request): JsonResponse
@@ -131,5 +121,23 @@ final class AvailabilityController extends AbstractController
         $this->em->flush();
 
         return $this->json(['success' => true]);
+    }
+
+    #[Route('/availability/month', name: 'availability_month')]
+    public function month(
+        Request $request,
+    ): JsonResponse {
+        $year = (int)$request->query->get('year');
+        $month = (int)$request->query->get('month');
+
+        $days = $this->availabilityService->getMonthData(
+            $this->getUser(),
+            $year,
+            $month
+        );
+
+        return $this->json([
+            'days' => $days,
+        ]);
     }
 }
