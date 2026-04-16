@@ -34,11 +34,7 @@ final class AvailabilityController extends AbstractController
     #[Route('/availability', name: 'availability_calendar')]
     public function calendar(): Response
     {
-        
-    
-        return $this->render('availability/calendar.html.twig', [
-            
-        ]);
+        return $this->render('availability/calendar.html.twig');
     }
     
 
@@ -123,7 +119,7 @@ final class AvailabilityController extends AbstractController
         return $this->json(['success' => true]);
     }
 
-    #[Route('/availability/month', name: 'availability_month')]
+    #[Route('/availability/month', name: 'availability_month', methods: ['GET'])]
     public function month(
         Request $request,
     ): JsonResponse {

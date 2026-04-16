@@ -142,7 +142,7 @@ final class GameController extends AbstractController
             ], 409);
         }
 
-        $startingTime = $this->availabilityRepository->getStartingTimefromUsers($players);
+        $startingTime = $this->availabilityRepository->getStartingTimefromUsers($players, $date);
 
         $session = new GameSession();
         $session->setGame($game);
