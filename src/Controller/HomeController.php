@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\GameSessionRepository;
@@ -11,6 +12,7 @@ use App\Repository\GameRepository;
 use App\Repository\AvailabilityRepository;
 use App\Repository\UserRepository;
 use App\Entity\GameSession;
+use App\Service\HomeService;
 
 class HomeController extends AbstractController
 {
@@ -19,15 +21,22 @@ class HomeController extends AbstractController
     private $gameRepository;
     private $availabilityRepository;
     private $gameSessionRepository;
+    private $homeService;
 
     /**
      * Class constructor.
      */
-    public function __construct(GameRepository $gameRepository, AvailabilityRepository $availabilityRepository, GameSessionRepository $gameSessionRepository)
+    public function __construct(
+        GameRepository $gameRepository, 
+        AvailabilityRepository $availabilityRepository, 
+        GameSessionRepository $gameSessionRepository,
+        HomeService $homeService
+    )
     {
         $this->gameRepository = $gameRepository;
         $this->availabilityRepository = $availabilityRepository;
         $this->gameSessionRepository = $gameSessionRepository;
+        $this->homeService = $homeService;
     }
 
     #[Route('/', name: 'app_home')]
@@ -40,37 +49,8 @@ class HomeController extends AbstractController
             'user'      => $user,
             'userGames' => $user->getGames()
         ];
-
-        $users = $userRepository->findAll();
-        $playersAvailability = $this->availabilityRepository->findPlayersAvailabilityForCurrentMonth($users, new \DateTime());
-        $parameters['playersAvailability'] = $playersAvailability;
-
-        if ($this->isGranted('ROLE_DM')) { 
-            $games = $this->gameRepository->findAll();
-            $commonDates = $this->availabilityRepository->findCommonAvailableDatesForGames($games, new \DateTime());
-
-            $gameOptions = [];
-            foreach ($games as $game) {
-                $gameOptions[] = ['id'=>$game->getId(), 'name'=>$game->getName()];
-            }
-
-            $sessionsDaysRaw = $this->gameSessionRepository->findAll();
-            
-            $sessionsDays = array_column(
-                array_map(function ($row) {
-                    return [
-                        'date' => $row->getDate()->format('Y-m-d'),
-                        'gameId' => $row->getGame()->getId()
-                    ];
-                }, $sessionsDaysRaw),
-                'gameId',
-                'date'
-            );
-
-            $parameters['commonDates'] = $commonDates;
-            $parameters['gameOptions'] = $gameOptions;
-            $parameters['sessionsDays'] = $sessionsDays;
-        }
+        
+        $parameters['activeGames'] = $this->gameRepository->findBy(['active' => true]);
 
         return $this->render('home/index.html.twig', $parameters);
     }
@@ -120,11 +100,37 @@ DESCRIPTION:Sesja RPG
 LOCATION: Discord 
 END:VEVENT
 END:VCALENDAR";
-
+        $fileName = $title.' - '.$date->format('Ymd');
         return new Response($ics, 200, [
             'Content-Type' => 'text/calendar',
-            'Content-Disposition' => 'attachment; filename="session.ics"',
+            'Content-Disposition' => 'attachment; filename="'.$fileName.'.ics"',
         ]);
     }
 
+    #[Route('/calendar/month', name: 'calendar_month', methods: ['GET'])]
+    public function month(
+        Request $request,
+    ): JsonResponse {
+        $year = (int)$request->query->get('year');
+        $month = (int)$request->query->get('month');
+        $params = [];
+
+        if (!empty($request->query->get('availability'))) {
+            $params['availability'] = $request->query->get('availability');
+        }
+
+        if (!empty($request->query->get('gameId'))) {
+            $params['gameId'] = (int)$request->query->get('gameId');
+        }
+
+        $days = $this->homeService->getMonthData(
+            $year,
+            $month,
+            $params
+        );
+
+        return $this->json([
+            'days' => $days,
+        ]);
+    }
 }

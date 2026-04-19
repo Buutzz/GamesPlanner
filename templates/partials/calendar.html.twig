@@ -1,9 +1,54 @@
+{% set showCenterButtons = showCenterButtons|default(false) %}
+{% set markWholeMonthOption = markWholeMonthOption|default(false) %}
+{% set activeGames = activeGames|default(false) %}
+
 <div class="calendar-wrapper">
   <div id="calendar-app">
     <div class="calendar-nav">
-      <button id="prevMonth">Prev</button>
-      <span id="currentMonthLabel"></span>
-      <button id="nextMonth">Next</button>
+      <div class="nav-label">
+        <h1 id="currentMonthLabel"></h1>
+      </div>
+      <div class="nav-center-buttons">
+        {% if showCenterButtons %}
+          <button id="switchDisplayModeBtn" class="btn btn-primary">
+            <span class="bi bi-arrow-left-right"></span>
+          </button>
+          {% if activeGames %}
+            <select id="gameAvailabilitySwitcher" class="form-select">
+                <option value="0">-- Wszyscy gracze --</option>
+              {% for game in activeGames %}
+                <option value="{{ game.id }}">
+                    {{ game.name }}
+                </option>
+            {% endfor %}
+            </select>
+          {% endif %}
+        
+        {% endif %}
+        {% if markWholeMonthOption %}
+        <button id="markWholeMonthAvailableBtn" class="btn btn-secondary btn-sm">
+          <i class="bi bi-calendar2-check-fill"></i> Zaznacz cały miesiąc
+        </button>
+        {% endif %}
+      </div>
+      <div class="nav-right-buttons btn-group">
+        <button id="currentMonthBtn" class="btn btn-primary">Dziś</button>
+        <button id="prevMonth" class="btn btn-primary">
+          <span class="bi bi-chevron-left"></span>
+        </button>
+        <button id="nextMonth" class="btn btn-primary">
+          <span class="bi bi-chevron-right"></span>
+        </button>
+      </div>
+    </div>
+    <div id="calendar-header">
+      <div class="day-main-header">Pon</div>
+      <div class="day-main-header">Wt</div>
+      <div class="day-main-header">Śr</div>
+      <div class="day-main-header">Czw</div>
+      <div class="day-main-header">Pt</div>
+      <div class="day-main-header">Sb</div>
+      <div class="day-main-header">Nd</div>
     </div>
     <div id="calendar"></div>
   </div>

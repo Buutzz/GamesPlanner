@@ -33,11 +33,13 @@ class GameSessionRepository extends ServiceEntityRepository
         return count($result) === 0;
     }
 
-    public function findUpcoming(): array
+    public function findUpcoming($start, $end): array
     {
         return $this->createQueryBuilder('s')
-            ->where('s.date >= :today')
-            ->setParameter('today', new \DateTime())
+            ->where('s.date >= :start')
+            ->andWhere('s.date <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
             ->orderBy('s.date', 'ASC')
             ->getQuery()
             ->getResult();

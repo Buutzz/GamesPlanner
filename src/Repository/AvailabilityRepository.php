@@ -115,17 +115,15 @@ class AvailabilityRepository extends ServiceEntityRepository
             foreach ($result as $row) {
                 $dateStr = $row['date']->format('Y-m-d');
                 if (!isset($dates[$dateStr])) $dates[$dateStr] = [];
-                $dates[$dateStr][$game->getId()] = true;
+                $dates[$dateStr][$game->getId()] = $game->getName();
             }
         }
 
         return $dates;
     }
 
-    public function findPlayersAvailabilityForCurrentMonth($users, \DateTimeInterface $month): array
+    public function findPlayersAvailability($users, \DateTimeInterface $start, \DateTimeInterface $end): array
     {
-        $start = (new \DateTimeImmutable($month->format('Y-m-01')))->setTime(0, 0, 0);
-        $end = $start->modify('last day of this month')->setTime(23, 59, 59);
 
         $availabilities = $this->createQueryBuilder('a')
             ->join('a.user', 'u')
@@ -166,12 +164,14 @@ class AvailabilityRepository extends ServiceEntityRepository
         return $result;
     }
 
-    public function getStartingTimefromUsers(array $players): ?Availability
+    public function getStartingTimefromUsers(array $players, \DateTimeInterface $date): ?Availability
     {
         return $this->createQueryBuilder('a')
             ->where('a.user IN (:players)')
+            ->andwhere('a.date = :date')
             ->andWhere('a.startingTime IS NOT NULL')
             ->setParameter('players', $players)
+            ->setParameter('date', $date)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
@@ -188,5 +188,19 @@ class AvailabilityRepository extends ServiceEntityRepository
             ->orderBy('a.date', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function checkIfUserHasAvailibilityAlready($user, \DateTimeInterface $start, \DateTimeInterface $end): bool
+    {
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.user = :user')
+            ->andWhere('a.date BETWEEN :start AND :end')
+            ->andWhere('a.available = true')
+            ->setParameter('user', $user)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
     }
 }

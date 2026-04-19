@@ -15,4 +15,16 @@ class GameRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Game::class);
     }
+
+    public function findAllActiveGamesArray(): array
+    {
+        $games = $this->findBy(['active' => true], ['id' => 'ASC']);
+
+        $gamesArray = [];
+        foreach ($games as $game){
+            $gamesArray[$game->getId()] = $game->getName();
+        }
+
+        return $gamesArray;
+    }
 }

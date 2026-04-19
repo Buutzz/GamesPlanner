@@ -13,7 +13,7 @@ class AvailabilityService
     public function getMonthData($user, int $year, int $month): array
     {
         $start = new \DateTimeImmutable("$year-$month-01");
-        $end = $start->modify('last day of this month');
+        $end = $start->modify('last day of this month')->setTime(23, 59, 59);
 
         $records = $this->availabilityRepository
             ->findByUserAndDateRange($user, $start, $end);

@@ -76,7 +76,7 @@ final class AvailabilityController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $start = (new \DateTimeImmutable((new \DateTime())->format('Y-m-01')))->setTime(0, 0, 0);
+        $start = ((new \DateTimeImmutable($request->request->get('date')))->modify('first day of this month'))->setTime(0, 0, 0);
         $end = $start->modify('last day of this month')->setTime(23, 59, 59);
         $userId = $this->getUser()->getId();
 
@@ -134,6 +134,18 @@ final class AvailabilityController extends AbstractController
 
         return $this->json([
             'days' => $days,
+        ]);
+    }
+
+    #[Route('/availability/month/check', name: 'availability_month_check', methods: ['POST'])]
+    public function checkMonth(Request $request): JsonResponse
+    {
+        $start = ((new \DateTimeImmutable($request->request->get('date')))->modify('first day of this month'))->setTime(0, 0, 0);
+        $end = $start->modify('last day of this month')->setTime(23, 59, 59);
+        $user = $this->getUser();
+
+        return $this->json([
+            'hasAvailability' => $this->availabilityRepository->checkIfUserHasAvailibilityAlready($user, $start, $end)
         ]);
     }
 }

@@ -10,7 +10,9 @@
             <h1>Twoja dostępność</h1>
         </div>
         <div class="col-12 py-2 mb-5 card text-white bg-primary" id="calendar-wrapper">
-            {% include 'partials/calendar.html.twig' %}
+            <div id="availability-calendar">
+            {% include 'partials/calendar.html.twig' with{'markWholeMonthOption': true} %}
+            </div>
             <div class="calendar-legend">
               <div class="legend-item">
                   <div class="legend-color" style="background-color: #c8f7c5;"></div>
@@ -30,6 +32,7 @@
       action="{{ path('availability_mark_month') }}">
     <input type="hidden" name="_token"
            value="{{ csrf_token('mark_month') }}">
+    <input type="hidden" name="date" id="markWholeMonthDate" value>
 </form>
 <div class="modal fade" id="confirmMonthModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -102,139 +105,4 @@
     </div>
   </div>
 </div>
-
-<script>
-  let currentDate = new Date();
-  async function loadMonth(year, month) {
-    const res = await fetch(`/availability/month?year=${year}&month=${month}`);
-    const data = await res.json();
-
-    renderCalendar(data.days);
-    updateLabel(year, month);
-  }
-
-  function renderCalendar(days) {
-    const container = document.getElementById('calendar');
-
-    container.innerHTML = `
-      <div class="calendar">
-        ${days.map(day => `
-          <div class="
-            day
-            ${day.isCurrentMonth ? '' : 'other-month'}
-            ${day.available ? 'available' : 'unavailable'}
-          " 
-          data-date="${day.date}"
-          ${day.isCurrentMonth ? 'data-active=true' : ''}>
-
-            <div class="day-header">${day.dayNumber}</div>
-
-            ${
-              day.isCurrentMonth && day.time
-                ? `<div class="time">${day.time}</div>`
-                : ''
-            }
-
-            ${
-              day.isCurrentMonth && day.available
-                ? `<button class="set-time-btn">Godzina</button>`
-                : ''
-            }
-
-          </div>
-        `).join('')}
-      </div>
-    `;
-
-    attachListeners();
-  }
-
-  function attachListeners() {
-    document.querySelectorAll('.day[data-active]').forEach(el => {
-      el.addEventListener('click', async (e) => {
-        if (e.target.closest('.set-time-btn')) return;
-
-        const date = el.dataset.date;
-
-        const res = await fetch('/availability/toggle', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'date=' + date
-        });
-
-        const data = await res.json();
-
-        el.classList.toggle('available', data.available);
-        el.classList.toggle('unavailable', !data.available);
-      });
-    });
-
-    document.querySelectorAll('.set-time-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        const date = btn.closest('.day').dataset.date;
-
-        window.selectedDate = date;
-
-        const modal = new bootstrap.Modal(document.getElementById('timeModal'));
-        modal.show();
-      });
-    });
-  }
-
-  document.getElementById('prevMonth').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    loadMonth(currentDate.getFullYear(), currentDate.getMonth() + 1);
-  });
-
-  document.getElementById('nextMonth').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    loadMonth(currentDate.getFullYear(), currentDate.getMonth() + 1);
-  });
-
-  function updateLabel(year, month) {
-    const label = document.getElementById('currentMonthLabel');
-    label.textContent = `${year}-${String(month).padStart(2, '0')}`;
-  }
-
-  loadMonth(currentDate.getFullYear(), currentDate.getMonth() + 1);
-</script>
-<style>
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-}
-
-.day {
-  min-height: 110px;
-  padding: 6px;
-  border: 1px solid #444;
-  position: relative;
-}
-
-/* dni z miesiąca */
-.day.available {
-  background: #c8f7c5;
-  cursor: pointer;
-}
-
-.day.unavailable {
-  background: #f7c5c5;
-  cursor: pointer;
-}
-
-/* dni spoza miesiąca */
-.day.other-month {
-  background: #2a2a2a;
-  opacity: 0.4;
-  pointer-events: none; /* 🔥 najważniejsze */
-}
-
-/* button */
-.set-time-btn {
-  margin-top: 5px;
-  width: 100%;
-  font-size: 12px;
-}
 {% endblock %}

@@ -180,3 +180,152 @@ input#minuteInput {
     padding:2px;
     width:100%;
 }
+
+.calendar-nav{
+    margin: 1rem 0;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+
+    & .nav-center-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+
+        & #gameAvailabilitySwitcher{
+            display: none;
+        }
+    }
+}
+
+#calendar-header{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); 
+
+    & > .day-main-header{
+        text-align: center;
+        font-weight: 600;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        margin: 0 1px 3px 1px;
+    }
+
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+
+    & .day {
+        min-height: 110px;
+        padding: 6px;
+        border: 1px solid #444;
+        position: relative;
+
+        &.available {
+            background: #c8f7c5;
+            cursor: pointer;
+        }
+
+        &.unavailable {
+            background: #f7c5c5;
+            cursor: pointer;
+        }
+
+
+        &.other-month {
+            background: #2a2a2a;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+
+        &-header {
+            display: flex;
+            flex-flow: row;
+            align-items: center;
+            justify-content: space-between;
+            min-height:38px;
+
+            & .set-time-btn {
+                width: fit-content;
+                font-size: 12px;
+            }
+        }
+    }
+}
+
+#home-calendar,
+#gamemaster-calendar {
+
+    & .calendar {
+        border-left: 1px solid rgb(23, 25, 27);
+        border-top: 1px solid rgb(23, 25, 27);
+ 
+        & .day {
+            min-width: 0;
+            border-right: 1px solid rgb(23, 25, 27);
+            border-bottom: 1px solid rgb(23, 25, 27);
+
+            &.other-month {
+                opacity:1;
+            }
+
+            & .game-planned{
+                display: flex;
+                margin: 10px auto;
+                width: 100%;
+                font-size: 13px;
+                flex-flow: row nowrap;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                line-height: 1;
+                padding: 6px 10px;
+
+                & div{
+                    text-shadow: none;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+
+            & .players-availibility {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                font-size: 12px;
+
+                & .player {
+                    &.is {
+                        &-available,
+                        &-unavailable{
+                            &::before{
+                                content: "\F287";
+                                font-size:12px;
+                                margin-right: 5px;
+                                display: inline-block;
+                                font-family: "bootstrap-icons";
+                            }
+                        }
+
+                        &-available{
+                            &::before{
+                                color: rgb(98, 196, 98)
+                            }
+                        }
+
+                        &-unavailable{
+                            &::before{
+                                color: rgb(238, 95, 91);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
