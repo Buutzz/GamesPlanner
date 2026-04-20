@@ -22,8 +22,10 @@ class GamesSessionController extends AbstractController
         if ($token !== $_ENV['BOT_API_TOKEN']) {
             return $this->json(['error' => 'Unauthorized'], 401);
         }
+        $start = new \DateTimeImmutable((new \DateTime())->format('Y-m-d 00:00:01'));
+        $end = $start->modify('last day of +1 month')->setTime(23, 59, 59);
 
-        $sessions = $repo->findUpcoming();
+        $sessions = $repo->findUpcoming($start, $end);
 
         $data = [];
 
