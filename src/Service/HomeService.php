@@ -29,7 +29,7 @@ class HomeService extends AbstractController {
                 $users = $this->userRepository->findAll();
             } else {
                 $game = $this->gameRepository->findOneBy(['id' => (int)$params['gameId'],]);
-                $users = $game->getPlayers();
+                $users = $game->getAllParticipants();
             }
             $map['availibility'] = $this->availabilityRepository->findPlayersAvailability($users, $start, $end);
         }
