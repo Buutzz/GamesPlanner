@@ -51,7 +51,7 @@ class GamesSessionController extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/games/active', methods: ['GET'], name:'api_sessions_upcoming')]
+    #[Route('/games/active', methods: ['GET'], name:'api_games_active_with_sessions')]
     public function getListOfActiveGamesWithSessions(): JsonResponse {
         $start = new \DateTimeImmutable((new \DateTime())->format('Y-m-d 00:00:01'));
         $end = $start->modify('last day of +1 month')->setTime(23, 59, 59);
