@@ -65,6 +65,7 @@ class GamesSessionController extends AbstractController
             $gameId = (int)$game->getId();
 
             $data[$gameId] = [
+                "id" => $gameId,
                 'name' => $game->getName(),
                 'sessions' => []
             ];
