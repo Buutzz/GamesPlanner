@@ -53,7 +53,9 @@ class GamesSessionController extends AbstractController
 
     #[Route('/games/active', methods: ['GET'], name:'api_sessions_upcoming')]
     public function getListOfActiveGamesWithSessions(): JsonResponse {
-        $sessions = $this->gameSessionRepository->findActiveSessions();
+        $start = new \DateTimeImmutable((new \DateTime())->format('Y-m-d 00:00:01'));
+        $end = $start->modify('last day of +1 month')->setTime(23, 59, 59);
+        $sessions = $this->gameSessionRepository->findUpcoming($start, $end);
 
         $data = [];
 
