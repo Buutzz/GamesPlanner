@@ -60,16 +60,14 @@ class GamesSessionController extends AbstractController
         foreach ($sessions as $session) {
             $game = $session->getGame();
 
-            if (!isset($data[$game->getId()])) {
-                $data[$game->getId()] = [
-                    'id' => $game->getId(),
-                    'name' => $game->getName(),
-                    'sessions' => []
-                ];
-            }
+            $gameId = (int)$game->getId();
 
-            $data[$game->getId()]['sessions'][] = [
-                'id' => $session->getId(),
+            $data[$gameId] = [
+                'name' => $game->getName(),
+                'sessions' => []
+            ];
+            
+            $data[$gameId]['sessions'][] = [
                 'date' => $session->getDate()->format('Y-m-d'),
                 'time' => $session->getSessionStartingTime()?->format('H:i') ?? "19:30",
             ];
