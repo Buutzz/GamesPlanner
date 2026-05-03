@@ -64,11 +64,13 @@ class GamesSessionController extends AbstractController
 
             $gameId = (int)$game->getId();
 
-            $data[$gameId] = [
-                "id" => $gameId,
-                'name' => $game->getName(),
-                'sessions' => []
-            ];
+            if (!isset($data[$gameId])) {
+                $data[$gameId] = [
+                    "id" => $gameId,
+                    'name' => $game->getName(),
+                    'sessions' => []
+                ];
+            }
             
             $data[$gameId]['sessions'][] = [
                 'date' => $session->getDate()->format('Y-m-d'),
@@ -77,6 +79,5 @@ class GamesSessionController extends AbstractController
         }
 
         return $this->json(array_values($data));
-
     }
 }
