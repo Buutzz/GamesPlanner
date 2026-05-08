@@ -39,7 +39,7 @@ final class AvailabilityController extends AbstractController
     
 
     #[Route('/availability/toggle', name: 'availability_toggle', methods: ['POST'])]
-    public function toogle(Request $request): JsonResponse
+    public function toogle(Request $request, GameSessionRepository $gameSessionRepository): JsonResponse
     {
         $user = $this->getUser();
         $date = new \DateTime($request->request->get('date'));
@@ -50,6 +50,10 @@ final class AvailabilityController extends AbstractController
         ]);
 
         if ($existing) {
+            if ($gameSessionRepository->userHasSessionOnDate($user, $date)) {
+                return $this->json([], 400);
+            }
+
             $this->em->remove($existing);
             $available = false;
         } else {

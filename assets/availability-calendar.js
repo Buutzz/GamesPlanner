@@ -72,30 +72,41 @@ export function initAvailabilityCalendar() {
 
                 const date = el.dataset.date;
 
-                const res = await fetch('/availability/toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'date=' + date
-                });
+                try {
+                    const res = await fetch('/availability/toggle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'date=' + encodeURIComponent(date)
+                    });
 
-                const data = await res.json();
+                    const data = await res.json();
 
-                el.classList.toggle('available', data.available);
-                el.classList.toggle('unavailable', !data.available);
-                const header = el.querySelector('.day-header');
-                const timeBtn = header.querySelector('.set-time-btn');
-
-                if (!data.available) {
-                    if (timeBtn) {
-                        timeBtn.replaceWith(document.createElement('span'));
+                    if (!res.ok) {
+                        const modalEl = document.getElementById('sessionPlannedForThisDayModal');
+                        const modal = new Modal(modalEl);
+                        modal.show();
+                        return;
                     }
-                } else {
-                    if (!timeBtn) {
-                        const btn = document.createElement('button');
-                        btn.className = 'set-time-btn btn btn-sm btn-warning';
-                        btn.innerHTML = `<i class="bi bi-clock-fill"></i>`;
-                        header.prepend(btn);
+
+                    el.classList.toggle('available', data.available);
+                    el.classList.toggle('unavailable', !data.available);
+                    const header = el.querySelector('.day-header');
+                    const timeBtn = header.querySelector('.set-time-btn');
+
+                    if (!data.available) {
+                        if (timeBtn) {
+                            timeBtn.replaceWith(document.createElement('span'));
+                        }
+                    } else {
+                        if (!timeBtn) {
+                            const btn = document.createElement('button');
+                            btn.className = 'set-time-btn btn btn-sm btn-warning';
+                            btn.innerHTML = `<i class="bi bi-clock-fill"></i>`;
+                            header.prepend(btn);
+                        }
                     }
+                } catch (err) {
+                    alert(err.message);
                 }
             });
         });
