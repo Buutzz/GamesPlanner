@@ -8,21 +8,33 @@ export function initCommon(calendarApi) {
         getShowAvailabilityGameId 
     } = calendarApi;
 
+    function changeMonth(date, type) {
+        const d = new Date(date);
+        const day = d.getDate();
+        d.setMonth(d.getMonth() + (type === 'next' ? 1 : -1));
+
+        if (d.getDate() !== day) {
+            d.setDate(0);
+        }
+
+        return d;
+    }
+
     document.getElementById('prevMonth')?.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
+        calendarApi.currentDate = changeMonth(calendarApi.currentDate, 'prev');
         loadMonth(
-            currentDate.getFullYear(), 
-            currentDate.getMonth() + 1, 
+            calendarApi.currentDate.getFullYear(), 
+            calendarApi.currentDate.getMonth() + 1, 
             getShowAvailability(),
             getShowAvailabilityGameId() 
         );
     });
 
     document.getElementById('nextMonth')?.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
+        calendarApi.currentDate = changeMonth(calendarApi.currentDate, 'next');
         loadMonth(
-            currentDate.getFullYear(),
-            currentDate.getMonth() + 1,
+            calendarApi.currentDate.getFullYear(),
+            calendarApi.currentDate.getMonth() + 1,
             getShowAvailability(),
             getShowAvailabilityGameId()
         );

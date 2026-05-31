@@ -172,6 +172,7 @@ class AvailabilityRepository extends ServiceEntityRepository
             ->andWhere('a.startingTime IS NOT NULL')
             ->setParameter('players', $players)
             ->setParameter('date', $date)
+            ->orderBy('a.startingTime', 'DESC') 
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();

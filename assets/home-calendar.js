@@ -6,6 +6,7 @@ export function initHomeCalendar() {
     if (!calendar) return null;
 
     let currentDate = new Date();
+    console.log(currentDate);
     let showAvailability = false;
     let showAvailabilityGameId = false;
 
@@ -80,7 +81,7 @@ export function initHomeCalendar() {
                                 <div class="possible-games" style="display:none;">
                                     ${Object.entries(day.availableGames || {}).map(([id, nazwa]) => `
                                         <div class="form-check">
-                                            <input type="checkbox" id="game-${id}-${day.date}" class="form-check-input"
+                                            <input type="checkbox" data-game-id="${id}" class="form-check-input"
                                                 ${day.plannedGame && Object.keys(day.plannedGame).length > 0 && day.plannedGame.gameId == id 
                                                     ? 'checked'
                                                     : day.plannedGame && Object.keys(day.plannedGame).length > 0 && day.plannedGame.gameId != id 
@@ -146,7 +147,7 @@ export function initHomeCalendar() {
 
         const input = e.target;
         const day = input.closest('.day').dataset.date;
-        const gameId = input.id.split('-')[1];
+        const gameId = input.dataset.gameId;
 
         if (input.checked) {
 
@@ -163,7 +164,15 @@ export function initHomeCalendar() {
                     alert(data.message);
                     e.target.checked = false;
                 } else {
-                    window.location.reload();
+                    let info = data.data;
+                    const a = document.createElement('a');
+                    a.href = `/session/${info.id}/calendar`;
+                    a.className = 'game-planned btn btn-info text-primary-emphasis';
+                    a.innerHTML = `
+                        <i class="bi bi-calendar-event text-primary-emphasis"></i>
+                        <div class="text-primary">${info.time} ${info.name}</div>
+                    `;
+                    input.closest('.day').appendChild(a);
                 }
             });
 
@@ -187,7 +196,8 @@ export function initHomeCalendar() {
                 if (!data.success) {
                     alert(data.message);
                 } else {
-                    window.location.reload();
+                    input.closest('.day').querySelector('.game-planned')?.remove();
+                    input.checked = false;
                 }
             });
 

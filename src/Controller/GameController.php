@@ -163,7 +163,12 @@ final class GameController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'date' => $date->format('Y-m-d')
+            'data' => [
+                'date' => $date->format('Y-m-d'),
+                'time' => $startingTime ? $startingTime->getStartingTime()->format('H:i') : '19:30',
+                'name' => $game->getName(),
+                'id' => $session->getId(),
+            ],
         ]);
     }
 
