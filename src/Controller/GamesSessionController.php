@@ -44,11 +44,13 @@ class GamesSessionController extends AbstractController
         foreach ($sessions as $session) {
             $game = $session->getGame();
 
+            $time = ($session->getSessionStartingTime()?->format('H:i') ?? "19:30") . ($session->getSessionEndingTime()?->format('H:i') ? ' - ' . $session->getSessionEndingTime()->format('H:i') : '');
+
             $data[] = [
                 'id' => $session->getId(),
                 'game' => $game->getName(),
                 'date' => $session->getDate()->format('Y-m-d'),
-                'time' => $session->getSessionStartingTime()?->format('H:i') ?? "19:30",
+                'time' => $time,
                 'channel_id' => $game->getDiscordChannelId(),
                 'role_id' => $game->getDiscordRoleId(),
             ];
@@ -77,10 +79,12 @@ class GamesSessionController extends AbstractController
                     'sessions' => []
                 ];
             }
+
+            $time = ($session->getSessionStartingTime()?->format('H:i') ?? "19:30") . ($session->getSessionEndingTime()?->format('H:i') ? ' - ' . $session->getSessionEndingTime()->format('H:i') : '');
             
             $data[$gameId]['sessions'][] = [
                 'date' => $session->getDate()->format('Y-m-d'),
-                'time' => $session->getSessionStartingTime()?->format('H:i') ?? "19:30",
+                'time' => $time,
             ];
         }
 
