@@ -37,6 +37,7 @@ export function initAvailabilityCalendar() {
                                 day.available
                                 ? `<button class="set-time-btn btn btn-sm btn-warning"
                                     ${day.time?.trim() ? `data-time="${day.time}"` : ''}
+                                    ${day.endTime?.trim() ? `data-end-time="${day.endTime}"` : ''}
                                 >
                                     <i class="bi bi-clock-fill"></i>
                                 </button>`
@@ -121,10 +122,23 @@ export function initAvailabilityCalendar() {
         const dayElement = btn.closest('.day');
         selectedDateForTime = dayElement.dataset.date;
 
+        document.getElementById('endHourInput').value = '';
+        document.getElementById('endMinuteInput').value = '';
+        document.getElementById('addEndingTimeCheckbox').checked = false;
+        document.getElementById('ending-time').style.display = 'none';
+
         if (btn.dataset.time) {
             const [hour, minute] = btn.dataset.time.split(':');
             document.getElementById('hourInput').value = Number(hour);
             document.getElementById('minuteInput').value = Number(minute);
+        }
+
+        if (btn.dataset.endTime) {
+            const [endHour, endMinute] = btn.dataset.endTime.split(':');
+            document.getElementById('endHourInput').value = Number(endHour);
+            document.getElementById('endMinuteInput').value = Number(endMinute);
+            document.getElementById('addEndingTimeCheckbox').checked = true;
+            document.getElementById('ending-time').style.display = 'flex';
         }
 
         new Modal(document.getElementById('timeModal')).show();

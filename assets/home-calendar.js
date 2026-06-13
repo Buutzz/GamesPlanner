@@ -63,6 +63,7 @@ export function initHomeCalendar() {
                                         type="button"
                                         class="btn btn-outline-warning btn-sm game-starting-time" 
                                         data-time="${day.plannedGame.time}"
+                                        data-end-time="${day.plannedGame.endTime || ''}"
                                         data-session-id="${day.plannedGame.id}"
                                     >
                                         <i class="bi bi-clock-fill"></i>
@@ -162,15 +163,29 @@ export function initHomeCalendar() {
         if (!btn) return;
 
         const gameTime = btn.dataset.time;
-        const [hour, minute] = gameTime.split(':');
+        const [startHour, startMinute] = gameTime.split(':');
+        const gameEndTime = btn.dataset.endTime;
         const sessionId = btn.dataset.sessionId;
+
+        document.getElementById('endHourInput').value = '';
+        document.getElementById('endMinuteInput').value = '';
+        document.getElementById('addEndingTimeCheckbox').checked = false;
+        document.getElementById('ending-time').style.display = 'none';
 
         const modalElement = document.getElementById('gameTimeModal');
         const gameTimeModal = new Modal(modalElement);
         modalElement.querySelector('#plannedGameTime').textContent = gameTime;
-        modalElement.querySelector('#hourInput').value = Number(hour);
-        modalElement.querySelector('#minuteInput').value = Number(minute);
+        modalElement.querySelector('#hourInput').value = Number(startHour);
+        modalElement.querySelector('#minuteInput').value = Number(startMinute);
         modalElement.querySelector('#timeSessionId').value = sessionId;
+        if (gameEndTime) {
+            const [endHour, endMinute] = gameEndTime.split(':');
+            document.getElementById('addEndingTimeCheckbox').checked = true;
+            document.getElementById('ending-time').style.display = 'flex';
+            document.getElementById('endHourInput').value = endHour;
+            document.getElementById('endMinuteInput').value = endMinute;
+            
+        }
         gameTimeModal.show();
 
     });
