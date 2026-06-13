@@ -31,6 +31,9 @@ class Availability
     #[ORM\Column(type: 'time', nullable: true)]
     private ?\DateTimeInterface $startingTime = null;
 
+    #[ORM\Column(type: 'time', nullable: true)]
+    private ?\DateTimeInterface $endingTime = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,6 +93,18 @@ class Availability
     public function setStartingTime(?\DateTimeInterface $startingTime): self
     {
         $this->startingTime = $startingTime;
+
+        return $this;
+    }
+
+    public function getEndingTime(): ?\DateTimeInterface
+    {
+        return $this->endingTime;
+    }
+
+    public function setEndingTime(?\DateTimeInterface $endingTime): self
+    {
+        $this->endingTime = $endingTime;
 
         return $this;
     }

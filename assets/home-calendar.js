@@ -6,7 +6,6 @@ export function initHomeCalendar() {
     if (!calendar) return null;
 
     let currentDate = new Date();
-    console.log(currentDate);
     let showAvailability = false;
     let showAvailabilityGameId = false;
 
@@ -58,6 +57,18 @@ export function initHomeCalendar() {
                                     </button>`
                                 : '<span></span>'
                             }
+                            ${
+                                day.plannedGame && Object.keys(day.plannedGame).length > 0
+                                ? `<button 
+                                        type="button"
+                                        class="btn btn-outline-warning btn-sm game-starting-time" 
+                                        data-time="${day.plannedGame.time}"
+                                        data-session-id="${day.plannedGame.id}"
+                                    >
+                                        <i class="bi bi-clock-fill"></i>
+                                    </button>`
+                                : '<span></span>'
+                            }
                             <span class="text-light">${day.dayNumber}</span>
                         </div>
 
@@ -102,7 +113,11 @@ export function initHomeCalendar() {
                             ? `
                                 <a href="/session/${day.plannedGame.id}/calendar" class="game-planned btn btn-info text-primary-emphasis">
                                     <i class="bi bi-calendar-event text-primary-emphasis"></i>
-                                    <div class="text-primary">${day.plannedGame.time} ${day.plannedGame.name}</div>
+                                    <div class="text-primary text-start">
+                                        ${day.plannedGame.time}
+                                        ${day.plannedGame.endTime ? ` - ${day.plannedGame.endTime}<br/>`: ''}
+                                        ${day.plannedGame.name.trim()}
+                                    </div>
                                 </a>
                             `
                             : ''
@@ -142,6 +157,24 @@ export function initHomeCalendar() {
         }
     });
 
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.game-starting-time');
+        if (!btn) return;
+
+        const gameTime = btn.dataset.time;
+        const [hour, minute] = gameTime.split(':');
+        const sessionId = btn.dataset.sessionId;
+
+        const modalElement = document.getElementById('gameTimeModal');
+        const gameTimeModal = new Modal(modalElement);
+        modalElement.querySelector('#plannedGameTime').textContent = gameTime;
+        modalElement.querySelector('#hourInput').value = Number(hour);
+        modalElement.querySelector('#minuteInput').value = Number(minute);
+        modalElement.querySelector('#timeSessionId').value = sessionId;
+        gameTimeModal.show();
+
+    });
+
     document.addEventListener('change', function (e) {
         if (!e.target.matches('.possible-games input[type="checkbox"]')) return;
 
@@ -170,7 +203,11 @@ export function initHomeCalendar() {
                     a.className = 'game-planned btn btn-info text-primary-emphasis';
                     a.innerHTML = `
                         <i class="bi bi-calendar-event text-primary-emphasis"></i>
-                        <div class="text-primary">${info.time} ${info.name}</div>
+                        <div class="text-primary text-start">
+                            ${info.time}
+                            ${info.endTime ? ` - ${info.endTime}<br/>`: ''}
+                            ${info.name.trim()}
+                        </div>
                     `;
                     input.closest('.day').appendChild(a);
                 }
@@ -204,6 +241,158 @@ export function initHomeCalendar() {
             cancelModal.hide();
         };
         cancelModal.show();
+    });
+
+    const saveTimeBtn = document.getElementById('saveNewSessionTimeBtn');
+    if (saveTimeBtn){
+
+        function timeFormValidation() {
+            const hour = parseInt(hourInput.value);
+            const minute = parseInt(minuteInput.value);
+
+            if (isNaN(hour) || hour < 0 || hour > 23) {
+                alert('Godzina rozpoczęcia musi być liczbą od 0 do 23.');
+                console.log(hour);
+                return false;
+            }
+
+            if (isNaN(minute) || minute < 0 || minute > 59) {
+                alert('Minuta musi być liczbą od 0 do 59.');
+                console.log(minute);
+                return false;
+            }
+
+            if (document.getElementById('addEndingTimeCheckbox').checked) {
+                const endingHour = parseInt(endHourInput.value);
+                const endingMinute = parseInt(endMinuteInput.value);
+
+                if (isNaN(endingHour) || endingHour < 0 || endingHour > 23) {
+                    alert('Godzina zakończenia musi być liczbą od 0 do 23.');
+                    return false;
+                }
+
+                if (isNaN(endingMinute) || endingMinute < 0 || endingMinute > 59) {
+                    alert('Minuta zakończenia musi być liczbą od 0 do 59.');
+                    return false;
+                }
+
+                const startingTime = new Date();
+                startingTime.setHours(hour, minute, 0, 0);
+
+                const endingTime = new Date();
+                endingTime.setHours(endingHour, endingMinute, 0, 0);
+
+                if (endingTime <= startingTime) {
+                    document.getElementById('ending-time-error').style.display = 'block';
+                    return false;
+                } else {
+                    document.getElementById('ending-time-error').style.display = 'none';
+                }
+            }
+
+            return true;
+        }
+
+        saveTimeBtn.addEventListener('click', function() {
+
+            let isValid = timeFormValidation();
+
+            if (!isValid) return;
+
+            const hour = String(hourInput.value).padStart(2,'0');
+            const minute = String(minuteInput.value).padStart(2,'0');
+            const sessionId = parseInt(document.getElementById('timeSessionId').value);
+
+            let url = `/games/${sessionId}/change-time`;
+
+            const time = `${hour}:${minute}`;
+            let endingTime = '00:00';
+            
+            if (document.getElementById('addEndingTimeCheckbox').checked) {
+                const endingHour = String(endHourInput.value).padStart(2,'0');
+                const endingMinute = String(endMinuteInput.value).padStart(2,'0');
+                endingTime = `${endingHour}:${endingMinute}`;
+            } 
+
+            if (!time || !sessionId) return;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'starting_time=' + time + '&ending_time=' + endingTime
+            })
+            .then(r => r.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    const modalEl = document.getElementById('gameTimeModal');
+                    Modal.getInstance(modalEl).hide();
+                    alert('Zapisano preferowany czas!');
+                    window.location.reload();
+                }
+            });
+        });
+
+       document.addEventListener('click', event => {
+            const button = event.target.closest('.time-hour-up');
+
+            if (!button) {
+                return;
+            }
+
+            const hourInput = button
+                .closest('.time-setting')
+                .querySelector('.hour-input');
+
+            hourInput.value = (parseInt(hourInput.value, 10) + 1) % 24;
+        });
+
+        document.addEventListener('click', event => {
+            const button = event.target.closest('.time-hour-down');
+
+            if (!button) {
+                return;
+            }
+
+            const hourInput = button
+                .closest('.time-setting')
+                .querySelector('.hour-input');
+
+            hourInput.value = (parseInt(hourInput.value) + 23) % 24;
+        });
+
+        document.addEventListener('click', event => {
+            const button = event.target.closest('.time-minute-up');
+
+            if (!button) {
+                return;
+            }
+
+            const minuteInput = button
+                .closest('.time-setting')
+                .querySelector('.minute-input');
+
+            minuteInput.value = (parseInt(minuteInput.value, 10) + 30) % 60;
+        });
+
+        document.addEventListener('click', event => {
+            const button = event.target.closest('.time-minute-down');
+
+            if (!button) {
+                return;
+            }
+
+            const minuteInput = button
+                .closest('.time-setting')
+                .querySelector('.minute-input');
+
+            minuteInput.value = (parseInt(minuteInput.value, 10) + 30) % 60;
+        });
+    }
+
+    document.getElementById('addEndingTimeCheckbox').addEventListener('change', function() {
+        document.getElementById('ending-time').style.display = this.checked ? 'flex' : 'none';
     });
 
     return { 

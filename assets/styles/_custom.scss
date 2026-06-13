@@ -150,7 +150,9 @@ footer {
 input.form-control.no-arrows::-webkit-outer-spin-button,
 input.form-control.no-arrows::-webkit-inner-spin-button,
 input#hourInput::-webkit-inner-spin-button,
-input#minuteInput::-webkit-inner-spin-button{
+input#minuteInput::-webkit-inner-spin-button,
+input#endHourInput::-webkit-inner-spin-button,
+input#endMinuteInput::-webkit-inner-spin-button{
     -webkit-appearance: none;
     margin: 0;
 }
@@ -158,7 +160,9 @@ input#minuteInput::-webkit-inner-spin-button{
 /* Firefox */
 input.form-control.no-arrows,
 input#hourInput,
-input#minuteInput {
+input#minuteInput,
+input#endHourInput,
+input#endMinuteInput {
     -moz-appearance: textfield;
 }
 
@@ -328,4 +332,8 @@ input#minuteInput {
             }
         }
     }
+}
+
+#ending-time{
+    display:none;
 }

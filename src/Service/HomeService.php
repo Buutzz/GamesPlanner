@@ -43,6 +43,7 @@ class HomeService extends AbstractController {
                     'gameId'    => $game->getGame()->getId(),
                     'name'  => $game->getGame()->getName(),
                     'time'  => $game->getSessionStartingTime()?->format('H:i') ?? '19:30',
+                    'endTime' => $game->getSessionEndingTime()?->format('H:i') ?? null,
                 ];
             }
         }

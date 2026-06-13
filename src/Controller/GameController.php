@@ -143,6 +143,7 @@ final class GameController extends AbstractController
         }
 
         $startingTime = $this->availabilityRepository->getStartingTimefromUsers($players, $date);
+        $endingTime = $this->availabilityRepository->getEndingTimefromUsers($players, $date);
 
         $session = new GameSession();
         $session->setGame($game);
@@ -153,6 +154,13 @@ final class GameController extends AbstractController
                 $startingTime->getStartingTime()->format('i')
             );
             $session->setSessionStartingTime($startingTimeValue);
+        }
+        if (!empty($endingTime)) {
+            $endingTimeValue = $date->setTime(
+                $endingTime->getEndingTime()->format('H'),
+                $endingTime->getEndingTime()->format('i')
+            );
+            $session->setSessionEndingTime($endingTimeValue);
         }
 
         $this->em->persist($session);
@@ -166,6 +174,7 @@ final class GameController extends AbstractController
             'data' => [
                 'date' => $date->format('Y-m-d'),
                 'time' => $startingTime ? $startingTime->getStartingTime()->format('H:i') : '19:30',
+                'endTime' => $endingTime ? $endingTime->getEndingTime()->format('H:i') :  null,
                 'name' => $game->getName(),
                 'id' => $session->getId(),
             ],
@@ -200,5 +209,26 @@ final class GameController extends AbstractController
             'success'   => true,
             'date'      => $date->format('Y-m-d')
         ]);
+    }
+
+    #[Route('/games/{id}/change-time', name: 'game_change_time', methods: ['POST'])]
+    public function changeSesionTime(int $id, Request $request): JsonResponse
+    {
+        $startingTime = $request->request->get('starting_time');
+        $endingTime = $request->request->get('ending_time');
+
+        $session = $this->gameSessionRepository->find($id);
+
+        if (!$session) {
+            return $this->json(['error' => 'Session not found'], 404);
+        }
+
+        $session->setSessionStartingTime(new \DateTime($startingTime));
+        $session->setSessionEndingTime(new \DateTime($endingTime));
+
+         $this->em->persist($session);
+         $this->em->flush();
+
+        return $this->json(['success' => true]);
     }
 }

@@ -99,6 +99,7 @@ final class AvailabilityController extends AbstractController
     {
         $date = new \DateTime($request->request->get('date'));
         $time = $request->request->get('time');
+        $endingTime = $request->request->get('ending_time');
 
         $availability = $this->availabilityRepository->findOneBy([
             'user' => $this->getUser(),
@@ -110,7 +111,7 @@ final class AvailabilityController extends AbstractController
         }
 
         $availability->setStartingTime(\DateTime::createFromFormat('H:i', $time));
-
+        $availability->setEndingTime(\DateTime::createFromFormat('H:i', $endingTime));
         $dateSession = $gameSessionRepository->userHasSessionOnDate($this->getUser(), $date);
 
         if ($dateSession) {

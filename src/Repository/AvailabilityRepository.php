@@ -178,6 +178,20 @@ class AvailabilityRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function getEndingTimefromUsers(array $players, \DateTimeInterface $date): ?Availability
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.user IN (:players)')
+            ->andwhere('a.date = :date')
+            ->andWhere('a.endingTime IS NOT NULL')
+            ->setParameter('players', $players)
+            ->setParameter('date', $date)
+            ->orderBy('a.endingTime', 'ASC') 
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function findByUserAndDateRange($user, \DateTimeInterface $start, \DateTimeInterface $end): array
     {
         return $this->createQueryBuilder('a')

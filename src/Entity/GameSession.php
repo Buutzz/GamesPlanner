@@ -23,6 +23,9 @@ class GameSession
     #[ORM\Column(type: 'time', nullable: true)]
     private ?\DateTimeInterface $sessionStartingTime = null;
 
+    #[ORM\Column(type: 'time', nullable: true)]
+    private ?\DateTimeInterface $sessionEndingTime = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -58,6 +61,18 @@ class GameSession
     public function setSessionStartingTime(?\DateTimeInterface $sessionStartingTime): self
     {
         $this->sessionStartingTime = $sessionStartingTime;
+
+        return $this;
+    }
+
+    public function getSessionEndingTime(): ?\DateTimeInterface
+    {
+        return $this->sessionEndingTime;
+    }
+
+    public function setSessionEndingTime(?\DateTimeInterface $sessionEndingTime): self
+    {
+        $this->sessionEndingTime = $sessionEndingTime;
 
         return $this;
     }

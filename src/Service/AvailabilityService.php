@@ -23,6 +23,7 @@ class AvailabilityService
             $map[$r->getDate()->format('Y-m-d')] = [
                 'available' => true,
                 'time' => $r->getStartingTime()?->format('H:i'),
+                'endTime' => $r->getEndingTime()?->format('H:i'),
             ];
         }
 
@@ -45,6 +46,7 @@ class AvailabilityService
                 'isCurrentMonth' => $d->format('m') === $start->format('m'),
                 'available' => $map[$dateStr]['available'] ?? false,
                 'time' => $map[$dateStr]['time'] ?? null,
+                'endTime' => $map[$dateStr]['endTime'] ?? null,
             ];
         }
 

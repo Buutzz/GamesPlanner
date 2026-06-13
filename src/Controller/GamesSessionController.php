@@ -6,16 +6,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\GameSessionRepository;
 
 #[Route('/api')]
 class GamesSessionController extends AbstractController
 {
 
+    private $em;
     private $gameSessionRepository;
     
-    public function __construct(GameSessionRepository $gameSessionRepository) {
+    public function __construct(
+        GameSessionRepository $gameSessionRepository,
+        EntityManagerInterface $em
+    ) {
         $this->gameSessionRepository = $gameSessionRepository;
+        $this->em = $em;
     }
 
     #[Route('/sessions/upcoming', methods: ['GET'], name:'api_sessions_upcoming')]

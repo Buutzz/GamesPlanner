@@ -51,5 +51,85 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="gameTimeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Czas rozpoczęcia gry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Planujesz rozpocząć sesję o <span id="plannedGameTime"></span>.</p>
+        <div class="d-flex justify-content-center align-items-center time-setting">
+
+          <input type="hidden" id="timeSessionId" value="" name="timeSessionId" />
+
+          <div class="text-center starting-time-hours">
+            <button class="btn btn-sm btn-outline-light time-hour-up">
+              <i class="bi bi-chevron-compact-up"></i>
+            </button>
+            <input type="number" id="hourInput" class="form-control text-center mt-1 mb-1 hour-input" min="0" max="23" value="19">
+            <button class="btn btn-sm btn-outline-light time-hour-down">
+              <i class="bi bi-chevron-compact-down"></i>
+            </button>
+          </div>
+
+          <div class="fs-4">:</div>
+
+          <div class="text-center starting-time-minutes">
+            <button class="btn btn-sm btn-outline-light time-minute-up">
+              <i class="bi bi-chevron-compact-up"></i>
+            </button>
+            <input type="number" id="minuteInput" class="form-control text-center mt-1 mb-1 minute-input" min="0" max="59" step="30" value="30">
+            <button class="btn btn-sm btn-outline-light time-minute-down">
+              <i class="bi bi-chevron-compact-down"></i>
+            </button>
+          </div>
+
+        </div>
+        <div class="d-flex flex-column justify-content-center align-items-center mt-4">
+          <div class="text-left">
+            <label for="ending-time" class="form-label">Czy dodać godzine zakończenia gry?</label>
+            <input type="checkbox" id="addEndingTimeCheckbox" class="form-check-input ms-2" />
+          </div>
+          <div id="ending-time" class="justify-content-center align-items-center time-setting">
+            <div class="text-center ending-time-hours">
+              <button class="btn btn-sm btn-outline-light time-hour-up">
+                <i class="bi bi-chevron-compact-up"></i>
+              </button>
+              <input type="number" id="endHourInput" class="form-control text-center mt-1 mb-1 hour-input" min="0" max="23" value="19">
+              <button class="btn btn-sm btn-outline-light time-hour-down">
+                <i class="bi bi-chevron-compact-down"></i>
+              </button>
+            </div>
+
+            <div class="fs-4">:</div>
+
+            <div class="text-center ending-time-minutes">
+              <button class="btn btn-sm btn-outline-light time-minute-up">
+                <i class="bi bi-chevron-compact-up"></i>
+              </button>
+              <input type="number" id="endMinuteInput" class="form-control text-center mt-1 mb-1 minute-input" min="0" max="59" step="30" value="30">
+              <button class="btn btn-sm btn-outline-light time-minute-down">
+                <i class="bi bi-chevron-compact-down"></i>
+              </button>
+            </div>
+          </div>
+          <div id="ending-time-error" class="text-danger mt-2" style="display:none;">
+            Godzina zakończenia nie może być wcześniejsza niż godzina rozpoczęcia.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Anuluj
+        </button>
+        <button type="button" class="btn btn-danger" id="saveNewSessionTimeBtn">
+          Tak, zapisz
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endif %}
 {% endblock %}

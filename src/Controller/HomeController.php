@@ -85,7 +85,7 @@ class HomeController extends AbstractController
         $date = $gameSession->getDate();
 
         $start = $date->format('Ymd').'T'.$gameSession->getSessionStartingTime()?->format('His');
-        $end = $date->format('Ymd').'T230000';
+        $end = $date->format('Ymd').'T'.($gameSession->getSessionEndingTime()?->format('His') ?? '230000');
 
         $title = $gameSession->getGame()->getName();
 
