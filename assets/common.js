@@ -46,4 +46,9 @@ export function updateLabel(year, month) {
     if (!label) return;
 
     label.textContent = `${year}-${String(month).padStart(2, '0')}`;
+
+    const markWholeMonthBtn = document.getElementById('markWholeMonthAvailableBtn');
+    if (markWholeMonthBtn) {
+        markWholeMonthBtn.dataset.date = `${year}-${String(month).padStart(2, '0')}`;
+    }
 }

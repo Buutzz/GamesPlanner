@@ -303,17 +303,19 @@ export function initAvailabilityCalendar() {
     });
 
     document.getElementById('markWholeMonthAvailableBtn')?.addEventListener('click', (e) => {
+
+        const buttonDate = new Date(e.target.dataset.date);
         
         fetch('/availability/month/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'date=' + currentDate.toISOString()
+                body: 'date=' + buttonDate.toISOString()
         })
         .then(r => r.json())
         .then(data => {
 
             const form = document.getElementById('markMonthForm');
-            form.querySelector('#markWholeMonthDate').value = currentDate.toISOString();
+            form.querySelector('#markWholeMonthDate').value = buttonDate.toISOString();
 
             if (data.hasAvailability) {
                 const modalEl = document.getElementById('confirmMonthModal');
