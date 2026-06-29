@@ -406,9 +406,14 @@ export function initHomeCalendar() {
         });
     }
 
-    document.getElementById('addEndingTimeCheckbox').addEventListener('change', function() {
-        document.getElementById('ending-time').style.display = this.checked ? 'flex' : 'none';
-    });
+    const checkbox = document.getElementById('addEndingTimeCheckbox');
+    const endingTime = document.getElementById('ending-time');
+
+    if (checkbox && endingTime) {
+        checkbox.addEventListener('change', function () {
+            endingTime.style.display = this.checked ? 'flex' : 'none';
+        });
+    }
 
     return { 
         loadMonth, 
