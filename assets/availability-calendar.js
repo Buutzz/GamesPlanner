@@ -22,7 +22,7 @@ export function initAvailabilityCalendar() {
         container.innerHTML = `
             <div class="calendar">
             ${days.map(day => `
-                <div class="
+                <div id="day-${day.date}" class="
                     day
                     ${day.isCurrentMonth ? '' : 'other-month'}
                     ${day.available ? 'available' : 'unavailable'}
@@ -48,7 +48,7 @@ export function initAvailabilityCalendar() {
 
                         ${
                             day.time || day.endTime
-                            ? `<div class="time text-secondary-emphasis">
+                            ? `<div id="day-${day.date}-time" class="time text-secondary-emphasis">
                                     <span class="badge bg-info text-secondary-emphasis">
                                         <i class="bi bi-clock-fill"></i> ${day.time ? day.time : '19:30'} ${day.endTime ? ` - ${day.endTime}`: ''}
                                     </span>
@@ -234,9 +234,22 @@ export function initAvailabilityCalendar() {
                 if (data.success) {
 
                     const modalEl = document.getElementById('timeModal');
+                    let dayTimeInfoEl = document.getElementById(`day-${selectedDateForTime}-time`);
+                    if (dayTimeInfoEl) {
+                        dayTimeInfoEl.innerHTML = `<span class="badge bg-info text-secondary-emphasis">
+                                                <i class="bi bi-clock-fill"></i> ${time} - ${endingTime}
+                                            </span>`;
+                    } else {
+                        const dayEl = document.getElementById(`day-${selectedDateForTime}`);
+                        const timeDiv = document.createElement('div');
+                        timeDiv.id = `day-${selectedDateForTime}-time`;
+                        timeDiv.className = 'time text-secondary-emphasis';
+                        timeDiv.innerHTML = `<span class="badge bg-info text-secondary-emphasis">
+                                                <i class="bi bi-clock-fill"></i> ${time} - ${endingTime}
+                                            </span>`;
+                        dayEl.appendChild(timeDiv);
+                    }
                     Modal.getInstance(modalEl).hide();
-                    alert('Zapisano preferowany czas!');
-                    window.location.reload();
                 }
             });
         });
