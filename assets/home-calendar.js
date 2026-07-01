@@ -15,6 +15,7 @@ export function initHomeCalendar() {
             month
         });
 
+        console.log(availability, gameId);
         if (availability === 0) {
             document.getElementById('gameAvailabilitySwitcher').style="display:none";
         } else if (availability !== false) {
@@ -419,6 +420,9 @@ export function initHomeCalendar() {
         loadMonth, 
         currentDate, 
         getShowAvailability: () => showAvailability,
-        getShowAvailabilityGameId: () => showAvailabilityGameId
+        getShowAvailabilityGameId: () => {
+            const el = document.getElementById('gameAvailabilitySwitcher');
+            return el ? el.value : false;
+        }
     };
 }
